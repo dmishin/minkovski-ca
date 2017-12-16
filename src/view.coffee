@@ -90,6 +90,8 @@ exports.View = class View
   translateCenterLocal: (dv)->
     dvGlobal = B.mulv B.adjoint(@viewMatrixBig), dv
     @center = @center.translate dvGlobal
+    if @selectedCell isnt null
+      @selectedCell = M.vcombine @selectedCell, -1, dv
     
   #cpnvert screen coordinates to integer translation relative to view center.
   screen2localInteger: (canvas, sxy) ->

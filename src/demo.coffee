@@ -12,7 +12,6 @@ CA = require "./ca.coffee"
 canvas = $("#canvas").get(0)
 infobox = $ "#info"
 
-ctx = canvas.getContext "2d"
 
 
 infobox.text "Loaded"
@@ -27,12 +26,12 @@ parseMatrix = (code) ->
 
 
 class Application
-  constructor: (@canvas, @context)->
+  constructor: (@canvas)->
+    @context = @canvas.getContext "2d"
     @world = null
     @view = null
-    @animation = null
+    @animations = []
     @needRepaint = true
-    @lastFrameTimestamp = null
     @controller = new ControllerHub this
   
   setLatticeMatrix: (m) ->
@@ -43,19 +42,30 @@ class Application
     
   repaintView: ->
     if @view isnt null
-      @view.drawGrid canvas, ctx
+      @view.drawGrid @canvas, @context
 
   startAnimationLoop: ->
     window.requestAnimationFrame @animationLoop
     
   animationLoop: (timestamp)=>
-    if @lastFrameTimestamp is null
-      @lastFrameTimestamp = timestamp
+    for animation in @animations
+      animation.onFrame this, timestamp
+
     if @needRepaint
       @repaintView()      
       @needRepaint = false
     window.requestAnimationFrame @animationLoop
+    
+  startAnimation: (animation)->
+    @animations.push animation
+    animation.start()
 
+  stopAnimation: (animation)->
+    idx = @animations.indexOf animation
+    if idx is -1 then throw new Error("Animation is not present in the animations list")
+    @animations.splice idx, 1
+    animation.stop()
+      
   navigateHome: ->
     @view.setLocation makeCoord(0,0), 0
     @needRepaint = true  
@@ -63,19 +73,24 @@ class Application
 
   updateNavigator: ->
     if @world.isEuclidean
-      $("#navi-skew").text("--")
+      $("#navi-squeeze").text("--")
     else
-      #its a logarithm of a skew
-      lskew = @view.getTotalAngle()
+      #its a logarithm of a squeeze
+      lsqueeze = @view.getTotalAngle()
       
-      $("#navi-skew").text( if lskew >= 0
-        "#{Math.exp lskew}"
+      $("#navi-squeeze").text( if lsqueeze >= 0
+        "#{Math.exp lsqueeze}"
       else
-        "1/#{Math.exp -lskew}")
+        "1/#{Math.exp -lsqueeze}")
     $("#navi-x").text ""+@view.center.x
     $("#navi-y").text ""+@view.center.y
     
-    
+  zoomIn: -> @zoomBy Math.pow(10, 0.2)
+  zoomOut: -> @zoomBy Math.pow(10, -0.2)
+  zoomBy: (k) ->
+    @view.scale *= k
+    @needRepaint = true
+        
 muls = (mtxs...) ->
   m = mtxs[0]
   for mi in mtxs[1..]
@@ -83,40 +98,24 @@ muls = (mtxs...) ->
   return m
 
 
-class Animation
+class RotateAnimation
   constructor: (@anglePerSec)->
-    @angle = 0.0
-    @playing = false
-    
   start: ->
-    return if @playing
-    @playing = true
-    @play()
-    
+    @lastTimeStamp = null
   stop: ->
-    @playing = false
-    
-  play: ->
-    
-    lastTimeStamp = null
-    frame = (timestamp)=>
-      app.view.drawGrid canvas, ctx
-      app.view.setAngle @angle
-      if lastTimeStamp isnt null
-          dt = timestamp - lastTimeStamp
-          if dt < 0
-            dt = 0
-          @angle += @anglePerSec * dt
-          invariantAngle = app.world.angle
-          if @angle > invariantAngle
-            @angle -= invariantAngle
-      lastTimeStamp = timestamp
-      if @playing
-        window.requestAnimationFrame frame
+  onFrame: (app, timestamp)->    
+    if @lastTimeStamp isnt null
+      dt = timestamp - @lastTimeStamp
+      if dt < 0
+        dt = 0
+      else if dt > 100
+        dt = 100
+        
+      app.view.incrementAngle @anglePerSec * dt
+      app.needRepaint = true
+    @lastTimeStamp = timestamp
 
-    window.requestAnimationFrame frame
-
-app = new Application canvas, ctx
+app = new Application canvas
         
 $("#world-clear").click ->
   app.world.clear()
@@ -137,20 +136,20 @@ $("#fld-matrix").on 'change', (e)->
     infobox.text ""+err
   
 $("#fld-matrix").trigger 'change'
-$("#btn-run-animation").on "click", (e)->
-  if app.animation is null
-    app.animation = new Animation 0.0002
-    app.animation.start()
-    console.log "Animation start"
-  else
-    app.animation.stop()
-    app.animation = null
-    console.log "Animation stop"
 
+
+$("#btn-run-animation").on "click", (e)->
+  if app.animations.length is 0
+    a = new RotateAnimation 0.0002
+    app.startAnimation a
+  else
+    app.stopAnimation app.animations[0]
+    
 $("#btn-go-home").on "click", (e)->app.navigateHome()
 
 $("#canvas").bind 'contextmenu', false
-
+$("#btn-zoom-in").on "click", ->app.zoomIn()
+$("#btn-zoom-out").on "click", ->app.zoomOut()
 
 
 
