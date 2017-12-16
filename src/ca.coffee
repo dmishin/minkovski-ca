@@ -152,10 +152,10 @@ exports.calculateConnections = calculateConnections = (world)->
       # offset vector from the original cell to this.
       dv = kv.k.offset richCell2.coord
 
-      # magniture of the distance vector
+      # magniture of the distance vector, bigint.
       mag = world.pnorm2 dv
 
-      if mag is world.c
+      if mag.equals world.c
         #if it is a neighbor, it must be a new neighbor. registe the connection without additional checks
         richCell.neighbors.push richCell2
         richCell2.neighbors.push richCell
@@ -236,7 +236,6 @@ exports.step = ( world, rule ) ->
     state = kv.v.value
 
     newState = rule.next state, sum
-    #console.log {s: state, sum: sum, ns: newState}
     if newState isnt 0
       world.cells.put kv.k, newState
   return
