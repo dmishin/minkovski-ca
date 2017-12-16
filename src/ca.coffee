@@ -89,16 +89,17 @@ conicsIntersection = (a, c, p, pap) ->
 
 
 #Find common neighbors of 2 cells. List of either 0, 1 or 2 Coord instances.
-exports.commonNeighbors = commonNeighbors = (A, c, coord1, coord2) ->
+# pap is optional, magnitude of the coord1-coord2 vector
+exports.commonNeighbors = commonNeighbors = (A, c, coord1, coord2, pap) ->
   v = coord1.offset coord2
   #now try to decompose v into sum of 2 vectors of norm xAx == c.
-  decomp = conicsIntersection A, c, v
+  decomp = conicsIntersection A, c, v, pap
   (coord1.translate(vi) for vi in decomp)
 
 
 
 #calls callback function for all different key-value pairs in the CustomHashMap
-iterateItemPairs = (customHashMap, onCellPair) ->
+exports.iterateItemPairs = iterateItemPairs = (customHashMap, onCellPair) ->
   previous = []
   customHashMap.iter (kv) ->
     for kv1 in previous
@@ -119,6 +120,78 @@ class DerivedCell
       @values.push kv.v
     return
 
+class ConnectedCell
+  #coord is stored for drawing purposes. ALso, to use "is" to check for equality. WIth coord, real equality check is needed.
+  constructor: (@coord, @value)->
+    @neighbors = [] #list of neighbor ConnectedCells
+    
+  addNeighborIfNotYet: (n)->
+    if @neighbors.indexOf(n) is -1
+      @neighbors.push n
+      true
+    else
+      false
+
+#Takes world and calculates enriched structure, where each cell knows its neighbors
+# and initially empty cells with 2 or more neighbors are present.
+#
+# Returned value is hash map with Coord key and ConnectedCell value
+exports.calculateConnections = calculateConnections = (world)->
+  #key is coord, value is ConnectedCell
+  connections = newCoordHash()
+
+  previous = []
+
+  world.cells.iter (kv) ->
+    #found a non-empty cell. it *must* be not present yet in the conencted map.
+    richCell = new ConnectedCell kv.k, kv.v
+    connections.put kv.k, richCell
+    # Now iterate all other cells that were visited before this.
+    for richCell2 in previous
+      # first find neighbors. To do this, calculate interval
+      # offset vector from the original cell to this.
+      dv = kv.k.offset richCell2.coord
+
+      # magniture of the distance vector
+      mag = world.pnorm2 dv
+
+      if mag is world.c
+        #if it is a neighbor, it must be a new neighbor. registe the connection without additional checks
+        richCell.neighbors.push richCell2
+        richCell2.neighbors.push richCell
+      
+      #also, these 2 cells might have common neighbor.
+      # (is it possible when they are neighbors? At least, for some grids (hexagonal) it is true.
+      for dv1 in conicsIntersection world.a, world.c, dv, mag
+        neighborCoord = kv.k.translate dv1
+        #found at least 1 common neighbor.
+        # ignore it if it is one of the old cells
+        continue if world.cells.has neighborCoord
+        #OK, this neighbor referes to the previously empty place.
+        # is it present in the rich map?
+        richNeighborCell = connections.get neighborCoord
+        if not richNeighborCell?
+          #when it is not registered yet, then do it
+          richNeighborCell = new ConnectedCell neighborCoord, 0
+          connections.put neighborCoord, richNeighborCell
+          #and add its parents as neighbors, without checking.
+          richNeighborCell.neighbors.push richCell
+          richNeighborCell.neighbors.push richCell2
+          richCell.neighbors.push richNeighborCell
+          richCell2.neighbors.push richNeighborCell
+        else
+          #so, maybe this neighbor was already obtained as a neighbor of some other cells
+          # in this case, register neighbors with a care
+          if richNeighborCell.addNeighborIfNotYet richCell
+            richCell.neighbors.push richNeighborCell
+          if richNeighborCell.addNeighborIfNotYet richCell2
+            richCell2.neighbors.push richNeighborCell
+      #done processing neighbors
+    #done cycle over previous cells
+    previous.push richCell
+  #Done. Now return connections map
+  connections  
+  
 #GIven a World instance, find all new cells that are not present in the world,
 # and have at least 2 common neighbors with world cells
 exports.newNeighbors = newNeighbors = (world) ->
@@ -147,34 +220,23 @@ exports.newNeighbors = newNeighbors = (world) ->
 
 
 #calculate generalized neighbor sum for the derived cell
-derivedCellSum = (dcell, rule) ->
+connectedCellSum = (cell, rule) ->
   s = rule.foldInitial
-  for value in dcell.values
-    s = rule.fold s, value
+  for neighbor in cell.neighbors
+    s = rule.fold s, neighbor.value
   return s
-
-worldCellSum = (coord, world, rule) ->
-  s = rule.foldInitial
-  world.cells.iter (kv) ->
-    if world.pdist2(kv.k, c) is world.c
-      0
 
 #Evaluate one step of the world, using given rule
 exports.step = ( world, rule ) ->
 
-  newState = newCoordHash()
+  connections = calculateConnections world
+  world.cells = newCoordHash()
+  connections.iter (kv)->
+    sum = connectedCellSum kv.v, rule
+    state = kv.v.value
 
-  #find new neighbors
-  newOnes = newNeighbors world
-
-
-  #iterate over new cells, because we already have parents for them
-  newOnes.iter (kv) ->
-    sum = derivedCellSum kv.v, rule
-    newCellState = rule.next 0, sum
-    if newCellState isnt 0
-      newState.put kv.k, newCellState
-
-  #iterate over existing cells
-  world.cells.iter (kv) ->
-    
+    newState = rule.next state, sum
+    #console.log {s: state, sum: sum, ns: newState}
+    if newState isnt 0
+      world.cells.put kv.k, newState
+  return

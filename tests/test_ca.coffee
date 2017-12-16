@@ -7,7 +7,7 @@ CA = require "../src/ca.coffee"
 M = require "../src/matrix2.coffee"
 BM = require "../src/bigmatrix.coffee"
 {qform, tfm2qform} = require "../src/mathutil.coffee"
-
+{CustomHashMap} = require "../src/hashmap.coffee"
 
 describe "commonNeighbors", ->
 
@@ -78,5 +78,32 @@ describe "commonNeighbors", ->
     assert.ok hadAnyNeighbor
 
 
-exports.evaluateStep = (world, rule) ->
   
+
+describe "iterateItemPairs", ->
+  idHash = (x) -> x
+  idEq = (x,y) -> x is y
+  
+  it "must give nothing with empty hash map", ->
+    h = new CustomHashMap idHash, idEq
+    CA.iterateItemPairs h, (kv1,kv2)->
+      assert.fail "Got callback with args: #{JSON.stringify [kv1, kv2]}"
+  it "must give nothing with map with 1 element too", ->
+    h = new CustomHashMap idHash, idEq
+    h.put 1, "hello"
+    CA.iterateItemPairs h, (kv1,kv2)->
+      assert.fail "Got callback with args: #{JSON.stringify [kv1, kv2]}"
+      
+  it "must invoke callback only once for map with 2 elemns",->
+    h = new CustomHashMap idHash, idEq
+    h.put 1, "hello"
+    h.put 2, "there"
+    callNumber = 0
+    CA.iterateItemPairs h, (kv1,kv2)->
+      if kv2.k < kv1.k
+        [kv2,kv1] = [kv1,kv2]
+      assert.deepEqual kv1, {k:1, v:"hello"}
+      assert.deepEqual kv2, {k:2, v:"there"}
+      callNumber += 1
+    assert.equal callNumber, 1
+    

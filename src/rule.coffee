@@ -18,8 +18,7 @@ exports.BinaryTotalisticRule = class BinaryTotalisticRule
 
     @tables[0] = parseTable m[1]
     @tables[1] = parseTable m[2]
-
-  next: (state, sumNeighbors) -> @tables[sate][sumNeighbors] ? 0
+  next: (state, sumNeighbors) -> @tables[state][sumNeighbors] ? 0
 
   #totalistic folding
   foldInitial: 0
@@ -27,8 +26,8 @@ exports.BinaryTotalisticRule = class BinaryTotalisticRule
   
   toString : ->
     tablekeys = (table) ->
-      keys = (parseInt(key) for key, _ of table)
-      keys.sort()
+      keys = (parseInt(key,10) for key, _ of table)
+      keys.sort (a,b)->a-b
       keys
     "B#{tablekeys(@tables[0]).join ' '} S#{tablekeys(@tables[1]).join ' '}"
 

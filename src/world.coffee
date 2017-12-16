@@ -4,6 +4,7 @@ bigInt = require "big-integer"
 {CustomHashMap} = require "./hashmap.coffee"
 {qform, tfm2qform}  = require "./mathutil.coffee"
 M = require "./matrix2.coffee"
+B = require "./bigmatrix.coffee"
 
 hashCombine = (h1,h2) -> (((h1 << 5) - h1) + h2)|0
 
@@ -89,7 +90,7 @@ exports.World = class World
     @cells.get coord, 0
 
   #vector pseudonorm
-  pnorm2: (bigVec) -> qformSmallA @a, bigVec
+  pnorm2: (bigVec) -> B.qformSmallA @a, bigVec
   
   #pseudo-distance between 2 coordinates
   pdist2: (coord1, coord2) -> @pnorm2 coord1.offset(coord2)
@@ -97,3 +98,6 @@ exports.World = class World
   clear: ->
     @cells = newCoordHash()
     this
+  population: -> @cells.size()
+
+  

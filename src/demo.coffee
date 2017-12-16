@@ -8,7 +8,7 @@ M = require "./matrix2.coffee"
 {World, makeCoord}= require "./world.coffee"
 {ControllerHub}= require "./controller.coffee"
 CA = require "./ca.coffee"
-
+{BinaryTotalisticRule} = require "./rule.coffee"
 canvas = $("#canvas").get(0)
 infobox = $ "#info"
 
@@ -33,7 +33,8 @@ class Application
     @animations = []
     @needRepaint = true
     @controller = new ControllerHub this
-  
+    @rule = new BinaryTotalisticRule "B3S2 3"
+    
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
     app.world = new World m, [1,0]
@@ -84,13 +85,19 @@ class Application
         "1/#{Math.exp -lsqueeze}")
     $("#navi-x").text ""+@view.center.x
     $("#navi-y").text ""+@view.center.y
-    
+  updatePopulation: ->
+    $("#info-population").text(""+@world.population())    
   zoomIn: -> @zoomBy Math.pow(10, 0.2)
   zoomOut: -> @zoomBy Math.pow(10, -0.2)
   zoomBy: (k) ->
     @view.scale *= k
     @needRepaint = true
-        
+
+  step: ->
+    CA.step @world, @rule
+    @updatePopulation()
+    @needRepaint = true
+                
 muls = (mtxs...) ->
   m = mtxs[0]
   for mi in mtxs[1..]
@@ -127,6 +134,7 @@ $("#replace-neighbors").click (e)->
   nn.iter (kv) ->
     app.world.cells.put kv.k, 1
   app.needRepaint = true
+
 $("#fld-matrix").on 'change', (e)->
   try
     app.setLatticeMatrix parseMatrix $("#fld-matrix").val()
@@ -137,6 +145,15 @@ $("#fld-matrix").on 'change', (e)->
   
 $("#fld-matrix").trigger 'change'
 
+$("#fld-rule").on 'change', (e)->
+  try
+    app.rule = new BinaryTotalisticRule $("#fld-rule").val()
+    infobox.text "Rule set to #{app.rule}"
+  catch err
+    console.log ""+err
+    infobox.text "Error setting rule:"+err
+    
+$("#fld-rule").trigger 'change'
 
 $("#btn-run-animation").on "click", (e)->
   if app.animations.length is 0
@@ -150,7 +167,7 @@ $("#btn-go-home").on "click", (e)->app.navigateHome()
 $("#canvas").bind 'contextmenu', false
 $("#btn-zoom-in").on "click", ->app.zoomIn()
 $("#btn-zoom-out").on "click", ->app.zoomOut()
-
+$("#btn-step").on "click", ->app.step()
 
 
 app.controller.attach $("canvas")
