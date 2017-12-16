@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="mystyle.css">
+  </head>
+  <body>
+    <div id="info">Info box</div>
+    <div id="navigator">
+      <table>
+	<tr><td>Skew:</td><td><span id="navi-skew" /></td></tr>
+	<tr><td>X:</td><td><span id="navi-x" /></td></tr>
+	<tr><td>Y:</td><td><span id="navi-y" /></td></tr>
+      </table>
+    <div id="parameters">
+      Matrix: <input id="fld-matrix" value="2 1 1 1"/>
+      
+      <button id="btn-run-animation">Animate</button>
+      <button id="replace-neighbors">Replace cells with their neighbors</button>
+      <button id="world-clear">Clear</button>
+      <button id="btn-go-home">Home</button>
+      
+    </div>
+    <canvas id="canvas" width="800" height="800"/> 
+
+    <script src="demo.js"></script>
+  </body>
+</html>
