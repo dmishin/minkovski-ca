@@ -115,9 +115,14 @@ class ConnectedCell
       true
     else
       false
-      
+  removeNeighbor: (n)->
+    idx = @neighbors.indexOf n
+    if idx isnt -1
+      @neighbors.splice idx, 1
+    else
+      throw new Error "Attempt to remove neighbor that is already removed"
   #calculate generalized neighbor sum for the derived cell
-  sum: (cell, rule) ->
+  sum: (rule) ->
     s = rule.foldInitial
     for neighbor in @neighbors
       s = rule.fold s, neighbor.value
@@ -189,6 +194,8 @@ exports.step = ( world, rule ) ->
 
   connections = calculateConnections world
   world.cells = newCoordHash()
+  world.connections = connections
+  
   connections.iter (kv)->
     sum = kv.v.sum rule
     state = kv.v.value
@@ -196,4 +203,6 @@ exports.step = ( world, rule ) ->
     newState = rule.next state, sum
     if newState isnt 0
       world.cells.put kv.k, newState
+    #store new value in the new state too, in order to simplify neighbor calculation
+    kv.v.value = newState
   return

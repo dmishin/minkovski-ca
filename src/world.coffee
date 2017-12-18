@@ -31,6 +31,7 @@ exports.newCoordHash = newCoordHash = -> new CustomHashMap(((c)->c.hash), ((c1,c
 exports.World = class World
   constructor: (skewMatrix, neighborVector)->
     @cells = newCoordHash()
+    @connections = null
     @m = skewMatrix
     @x0 = neighborVector
 

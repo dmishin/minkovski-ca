@@ -187,12 +187,31 @@ exports.View = class View
           "blue"
         else
            "black"
-        
-      if @world.getCell(@local2global([ix, iy])) isnt 0
+
+      cellCoord = @local2global [ix, iy]
+      if @world.getCell(cellCoord) isnt 0
         context.beginPath();
         context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
         context.closePath()
         context.fill()
+        if @world.connections isnt null
+          ccell = @world.connections.get cellCoord, null
+          if ccell isnt null
+            #iterate over alive neighbors of a cell
+            for neighbor in ccell.neighbors when neighbor.value isnt 0
+              #find coordinates of the neighbor in screen coords
+              [nix,niy] = B.mulv @viewMatrixBig, @center.offset neighbor.coord
+              #if neighbor is relatively close
+              if nix.isSmall and niy.isSmall
+                #coordinates of the neighbor on the screen
+                [nx, ny] = M.mulv T, [nix.value, niy.value]
+                #draw the line
+                context.beginPath()
+                context.moveTo sx, sy
+                context.lineTo nx, ny
+                context.stroke()
+    
+          
       #else
       #  context.stroke()
       
