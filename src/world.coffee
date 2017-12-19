@@ -61,6 +61,13 @@ exports.World = class World
     @latticeMatrix = M.mul vv, rot45
     @_sampledata()
     
+  setNeighborVector: (neighborVector)->
+    c = qform @a, neighborVector  #pseudonorm of the neighbor vector
+    if c is 0
+      Error "Vector #{JSON.stringify c} is null-vector for given grid matrix"
+    @x0 = neighborVector
+    @c = c
+
   _sampledata: ->
     put = (x,y) => @cells.put(new Coord(bigInt(x), bigInt(y)), 1)
     put 0, 0
@@ -98,7 +105,9 @@ exports.World = class World
     
   clear: ->
     @cells = newCoordHash()
+    @connections = null
     this
+
   population: -> @cells.size()
 
   

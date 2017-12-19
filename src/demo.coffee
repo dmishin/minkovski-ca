@@ -155,6 +155,17 @@ $("#fld-rule").on 'change', (e)->
     
 $("#fld-rule").trigger 'change'
 
+$("#fld-sample-neighbor").on 'change', (e)->
+  try
+    parts = $(this).val().trim().split /\s+/
+    if parts.length isnt 2 then throw new Error "Sample vector must have 2 coodrinates"
+    v = (parseInt(p,10) for p in parts)
+    app.world.setNeighborVector v
+  catch e
+    console.log ""+e
+    infobox.text "Error setting sample neighbor: #{e}"
+$("#fld-sample-neighbor").trigger 'change'      
+
 $("#btn-run-animation").on "click", (e)->
   if app.animations.length is 0
     a = new RotateAnimation 0.0002
