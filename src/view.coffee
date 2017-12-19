@@ -39,8 +39,9 @@ exports.View = class View
     @palette = ["#fe8f0f", "#f7325e", "#7dc410", "#fef8cf", "#0264ed"]
 
     @selectedCell = [0,0] #null or [ix, iy] pair. Small integers, relative to the view center.
+    @highlightedCell = null
 
-
+  setHighlightCell: (v)-> @highlightedCell = v
   incrementAngle: (da) ->
     @angle += da
     if @angle < -0.51*@world.angle
@@ -163,6 +164,14 @@ exports.View = class View
       context.closePath()
       context.strokeStyle = "green"
       context.stroke()
+    if @highlightedCell isnt null
+      [hx, hy] = M.mulv T, @highlightedCell
+      
+      context.beginPath();
+      context.arc(hx+dx, hy+dy, @cellSize*1.5, 0, Math.PI*2, true)
+      context.closePath()
+      context.strokeStyle = "#0808ff"
+      context.stroke()      
       
     #context.save()
     #context.translate width/2, height/2
@@ -202,14 +211,6 @@ exports.View = class View
       # 
       #convert integer points back to screen coordinates
       [sx, sy] = M.mulv T, [ix,iy]
-
-      if @selectedCell isnt null
-        [isx, isy] = @selectedCell
-        d2 = qform @world.a, [ix-isx, iy-isy]
-        context.strokeStyle = if d2 is @world.c
-          "blue"
-        else
-          "black"
 
       cellCoord = @local2global [ix, iy]
       if @world.getCell(cellCoord) isnt 0

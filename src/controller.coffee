@@ -1,3 +1,5 @@
+M = require "./matrix2.coffee"
+
 getMousePos = (canvas, evt) ->
   rect = canvas.getBoundingClientRect()
   [evt.clientX - rect.left, evt.clientY - rect.top]
@@ -13,6 +15,18 @@ class BaseController
     @app.needRepaint = true
   requestRepaintControls: ->
     @app.needRepaintCtl = true
+
+class HighlightController extends BaseController
+  constructor: (@app)->
+    super()
+    @lastHighlight = [0,0]
+    
+  mousemove: (e)->
+    hlCell = @mouse2local e
+    if not M.equal hlCell, @lastHighlight
+      @lastHighlight = hlCell
+      @app.view.setHighlightCell hlCell
+      @requestRepaintControls()  
   
 class ToggleCellController extends BaseController
   constructor: (app)->
@@ -117,13 +131,16 @@ exports.ControllerHub = class ControllerHub
     @secondary = new SelectCellController(@app)
     @shiftPrimary = new SkewController(@app)
     @shiftSecondary = new MoveController(@app)
+    @idle = new HighlightController(@app)
     
     @active = null
     
   mousemove: (e)=>
     if @active isnt null
       @active.mousemove e
-      e.preventDefault()
+    else
+      @idle.mousemove e
+    e.preventDefault()
   mousedown: (e)=>
     if e.button is 0
       if e.shiftKey

@@ -152,3 +152,7 @@ exports.normalized = normalized = (v) -> smul 1.0/Math.sqrt(len2 v), v
 exports.dot = ([x1,y1],[x2,y2]) -> x1*x2+y1*y2
 exports.vcombine = ([x1,y1], k, [x2,y2]) -> [x1+k*x2, y1+k*y2]
   
+exports.equal = equal = (u,v) ->
+  for ui, i in u
+    if ui isnt v[i] then return false
+  return true
