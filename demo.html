@@ -6,27 +6,39 @@
     <link rel="stylesheet" type="text/css" href="mystyle.css">
   </head>
   <body>
-    <div id="info">Info box</div>
-    <div id="navigator">
-      <table>
-	<tr><td>Squeeze:</td><td><span id="navi-squeeze" /></td></tr>
-	<tr><td>X:</td><td><span id="navi-x" /></td></tr>
-	<tr><td>Y:</td><td><span id="navi-y" /></td></tr>
-	<tr><td>Population:</td><td><span id="info-population" /></td></tr>
-      </table>
-    <div id="parameters">
-      Matrix: <input id="fld-matrix" value="2 1 1 1"/>
-      Rule: <input id="fld-rule" value="B3S2 3" />
-      Sample neighbor: <input id="fld-sample-neighbor" value="1 0"/>
-      <button id="btn-run-animation">Animate</button>
-      <button id="world-clear">Clear</button>
-      <button id="btn-go-home">Home</button>
-      <button id="btn-zoom-in">+</button>
-      <button id="btn-zoom-out">-</button>
-      <button id="btn-step">Step!</button>
+    <div id="controls" class="vertical-controls">
+      <div id="navigator">
+	<table>
+	  <tr><td>Squeeze:</td><td><span id="navi-squeeze" /></td></tr>
+	  <tr><td>X:</td><td><span id="navi-x" /></td></tr>
+	  <tr><td>Y:</td><td><span id="navi-y" /></td></tr>
+	  <tr><td>Population:</td><td><span id="info-population" /></td></tr>
+	</table>
+      </div>
+      <div id="parameters">
+	Matrix: <input id="fld-matrix" value="2 1 1 1"/>
+	Rule: <input id="fld-rule" value="B3S2 3" />
+	Sample neighbor: <input id="fld-sample-neighbor" value="1 0"/>
+	<button id="btn-run-animation">Animate</button>
+	<button id="world-clear">Clear</button>
+	<button id="btn-go-home">Home</button>
+	<button id="btn-zoom-in">+</button>
+	<button id="btn-zoom-out">-</button>
+	<button id="btn-step">Step!</button>
+      </div>
+      <div id="info">Info box</div>
     </div>
-    <canvas id="canvas" width="800" height="800"/> 
-
+    <div id="canvas-container" class="vertical-main-screen">
+      <div class="canvas-stack">
+	<canvas id="canvas" width="40" height="40" >
+	  No canvas support
+	</canvas>
+	
+	<canvas id="canvas-controls" width="40" height="40" >
+	</canvas>
+      </div>
+    </div>
+    
     <script src="demo.js"></script>
   </body>
 </html>

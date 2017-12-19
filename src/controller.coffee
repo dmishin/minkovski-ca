@@ -11,6 +11,8 @@ class BaseController
   mouse2local: (e)-> @app.view.screen2localInteger @app.canvas, getMousePos @app.canvas, e
   requestRepaint: ->
     @app.needRepaint = true
+  requestRepaintControls: ->
+    @app.needRepaintCtl = true
   
 class ToggleCellController extends BaseController
   constructor: (app)->
@@ -48,7 +50,7 @@ class SelectCellController extends BaseController
   mousedown: (e)->
     localCell = @mouse2local e
     @app.view.selectedCell = localCell
-    @requestRepaint()
+    @requestRepaintControls()
 
 class SkewController extends BaseController
   constructor: (app)->
@@ -79,6 +81,7 @@ class SkewController extends BaseController
       #app.view.translateCenterLocal M.smul -1, @skewCenter
       @orig = pos
       @requestRepaint()
+      @requestRepaintControls()
     
       
 class MoveController extends BaseController
@@ -99,6 +102,7 @@ class MoveController extends BaseController
     if dx isnt 0 or dy isnt 0
       @app.view.translateCenterLocal [dx, dy]
       @requestRepaint()
+      @requestRepaintControls()
       @originLocal = [x,y]
       
   mouseup: (e)->
@@ -135,6 +139,8 @@ exports.ControllerHub = class ControllerHub
         @active = @secondary
       
     if @active isnt null
+      e.target.setCapture()
+      
       @active.mousedown e
       e.preventDefault()
       

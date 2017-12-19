@@ -142,7 +142,35 @@ exports.View = class View
     
     #find intersection points
     context.restore()
+
+  drawControls: (canvas, context)->
+    width = canvas.width
+    height = canvas.height
+
+    dx = width * 0.5
+    dy = height * 0.5
+    T = @_combinedViewMatrix()
+    #invT = M.inv T
+
+    context.clearRect(0, 0, canvas.width, canvas.height)
     
+    if @selectedCell isnt null
+      [selx, sely] = M.mulv T, @selectedCell
+      @drawEquidistant canvas, context, selx+dx, sely+dy, @world.c
+      
+      context.beginPath();
+      context.arc(selx+dx, sely+dy, @cellSize*1.5, 0, Math.PI*2, true)
+      context.closePath()
+      context.strokeStyle = "green"
+      context.stroke()
+      
+    #context.save()
+    #context.translate width/2, height/2
+    #context.restore()
+
+  #map "local" to "screen"
+  _combinedViewMatrix: -> M.smul @scale, M.mul @viewMatrix, M.inv(@world.latticeMatrix)
+  
   drawGrid: (canvas, context)->
     scale = @scale
     width = canvas.width
@@ -152,7 +180,7 @@ exports.View = class View
     dy = height * 0.5
 
     #Combined transformation matrix, from integer lattice to screen
-    T = M.smul scale, M.mul @viewMatrix, M.inv(@world.latticeMatrix)
+    T = @_combinedViewMatrix()
     invT = M.inv T
 
     #quad in the screen coordinates
@@ -165,11 +193,6 @@ exports.View = class View
 
     dmin = Math.sqrt @world.c
     #get points and draw them
-
-    if @selectedCell isnt null
-      [selx, sely] = M.mulv T, @selectedCell
-      @drawEquidistant canvas, context, width/2+selx, height/2+sely, @world.c
-    #@drawEquidistant canvas, context, width/2, height/2, -@world.c
 
     invViewBig = B.adjoint @viewMatrixBig
     context.save()
@@ -186,7 +209,7 @@ exports.View = class View
         context.strokeStyle = if d2 is @world.c
           "blue"
         else
-           "black"
+          "black"
 
       cellCoord = @local2global [ix, iy]
       if @world.getCell(cellCoord) isnt 0
@@ -210,18 +233,6 @@ exports.View = class View
                 context.moveTo sx, sy
                 context.lineTo nx, ny
                 context.stroke()
-    
-          
-      #else
-      #  context.stroke()
-      
-    if @selectedCell isnt null
-      context.beginPath();
-      context.arc(selx, sely, @cellSize*1.5, 0, Math.PI*2, true)
-      context.closePath()
-      context.strokeStyle = "green"
-      context.stroke()
-        
     context.restore()
       
     

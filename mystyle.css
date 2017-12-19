@@ -1,0 +1,35 @@
+body: {
+    padding 0;
+}
+
+
+.vertical-controls{
+    position:absolute;
+    top:0;
+    bottom: 1em;
+    left:0;
+
+    width:14em;
+}
+.vertical-main-screen{
+    position:absolute;
+    top:0;
+    bottom:1em;
+    left:14em;
+    right:1em;
+    
+    padding:0;
+    border:0;
+    overflow:hidden;
+}
+
+.canvas-stack{
+    position:relative
+}
+canvas{
+    border:0;
+    padding:0;
+    position: absolute;
+    top:0;
+    left:0;
+}

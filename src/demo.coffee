@@ -26,24 +26,34 @@ parseMatrix = (code) ->
 
 
 class Application
-  constructor: (@canvas)->
+  constructor: ->
+    @canvas = $("#canvas").get(0)
+    @canvasCtl = $("#canvas-controls").get(0)
+    
     @context = @canvas.getContext "2d"
+    @contextCtl = @canvasCtl.getContext "2d"
+    
     @world = null
     @view = null
     @animations = []
     @needRepaint = true
+    @needRepaintCtl = true
     @controller = new ControllerHub this
     @rule = new BinaryTotalisticRule "B3S2 3"
     
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
-    app.world = new World m, [1,0]
-    app.view = new View app.world
+    @world = new World m, [1,0]
+    @view = new View @world
     @needRepaint = true
     
   repaintView: ->
     if @view isnt null
       @view.drawGrid @canvas, @context
+
+  repaintControls: ->
+    if @view isnt null
+      @view.drawControls @canvasCtl, @contextCtl
 
   startAnimationLoop: ->
     window.requestAnimationFrame @animationLoop
@@ -55,6 +65,9 @@ class Application
     if @needRepaint
       @repaintView()      
       @needRepaint = false
+    if @needRepaintCtl
+      @repaintControls()
+      @needRepaintCtl = false
     window.requestAnimationFrame @animationLoop
     
   startAnimation: (animation)->
@@ -97,7 +110,14 @@ class Application
     CA.step @world, @rule
     @updatePopulation()
     @needRepaint = true
-                
+    
+  updateCanvasSize: ->
+    cont = $ "#canvas-container"
+    @canvasCtl.width = @canvas.width = cont.innerWidth() | 0
+    @canvasCtl.height = @canvas.height = cont.innerHeight() | 0
+    @needRepaint = true
+    @needRepaintCtl = true
+    
 muls = (mtxs...) ->
   m = mtxs[0]
   for mi in mtxs[1..]
@@ -164,6 +184,7 @@ $("#fld-sample-neighbor").on 'change', (e)->
   catch e
     console.log ""+e
     infobox.text "Error setting sample neighbor: #{e}"
+    
 $("#fld-sample-neighbor").trigger 'change'      
 
 $("#btn-run-animation").on "click", (e)->
@@ -175,15 +196,15 @@ $("#btn-run-animation").on "click", (e)->
     
 $("#btn-go-home").on "click", (e)->app.navigateHome()
 
-$("#canvas").bind 'contextmenu', false
+$("#canvas,#canvas-controls").bind 'contextmenu', false
 $("#btn-zoom-in").on "click", ->app.zoomIn()
 $("#btn-zoom-out").on "click", ->app.zoomOut()
 $("#btn-step").on "click", ->app.step()
 
-
+$(window).resize (e)->app.updateCanvasSize()
 app.controller.attach $("canvas")
 
-
-
-app.updateNavigator()      
-app.startAnimationLoop()
+$(document).ready ->
+  app.updateCanvasSize()
+  app.updateNavigator()      
+  app.startAnimationLoop()
