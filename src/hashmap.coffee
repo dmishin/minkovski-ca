@@ -79,3 +79,12 @@ exports.CustomHashMap = class CustomHashMap
     for hash, pairs of @map
       mapped.map[hash] = (kv.map(mapfunc) for kv in pairs)
     return mapped
+
+  equal: (that, compareValues = (x,y)->(x is y)) ->
+    return false unless @size() is that.size()
+    
+    for _, pairs of @map
+      for pair in pairs
+        otherValue = that.get kv.k
+        return false unless otherValue? and (compareValues kv.v, otherValue)
+    return true

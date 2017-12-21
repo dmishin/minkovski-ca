@@ -230,6 +230,7 @@ connectedCellSum = (cell, rule) ->
 exports.step = ( world, rule ) ->
 
   connections = calculateConnections world
+  oldCells = world.cells
   world.cells = newCoordHash()
   connections.iter (kv)->
     sum = connectedCellSum kv.v, rule
@@ -238,4 +239,4 @@ exports.step = ( world, rule ) ->
     newState = rule.next state, sum
     if newState isnt 0
       world.cells.put kv.k, newState
-  return
+  return oldCells

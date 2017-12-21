@@ -1,5 +1,4 @@
 "use strict"
-
 $ = require "jquery"
 M = require "./matrix2.coffee"
 {convexQuadPoints} = require "./geometry.coffee"
@@ -9,13 +8,6 @@ M = require "./matrix2.coffee"
 {ControllerHub}= require "./controller.coffee"
 CA = require "./ca.coffee"
 {BinaryTotalisticRule} = require "./rule.coffee"
-canvas = $("#canvas").get(0)
-infobox = $ "#info"
-
-
-
-infobox.text "Loaded"
-
 
 parseMatrix = (code) ->
   code = code.trim()
@@ -37,8 +29,8 @@ class Application
     
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
-    app.world = new World m, [1,0]
-    app.view = new View app.world
+    @world = new World m, [1,0]
+    @view = new View @world
     @needRepaint = true
     
   repaintView: ->
@@ -97,13 +89,18 @@ class Application
     CA.step @world, @rule
     @updatePopulation()
     @needRepaint = true
+    
+  updateCanvasSize: ->
+    cc = $("#canvas-container")
+    @canvas.width = cc.width()
+    @canvas.height = $(window).innerHeight() - cc.offset().top
+    @needRepaint = true
                 
 muls = (mtxs...) ->
   m = mtxs[0]
   for mi in mtxs[1..]
     m = M.mul m, mi
   return m
-
 
 class RotateAnimation
   constructor: (@anglePerSec)->
@@ -122,57 +119,54 @@ class RotateAnimation
       app.needRepaint = true
     @lastTimeStamp = timestamp
 
-app = new Application canvas
-        
-$("#world-clear").click ->
-  app.world.clear()
-  app.needRepaint = true
+$(document).ready ->
+  infobox = $ "#info"
+  infobox.text "Loaded"
+  app = new Application $("#canvas").get(0)
+
+  app.updateCanvasSize()
   
-$("#replace-neighbors").click (e)->
-  nn = CA.newNeighbors app.world
-  console.log "New world has #{nn.size()} cells"
-  nn.iter (kv) ->
-    app.world.cells.put kv.k, 1
-  app.needRepaint = true
-
-$("#fld-matrix").on 'change', (e)->
-  try
-    app.setLatticeMatrix parseMatrix $("#fld-matrix").val()
-    infobox.text "Lattice matrix set"
-  catch err
-    console.log ""+err
-    infobox.text ""+err
-  
-$("#fld-matrix").trigger 'change'
-
-$("#fld-rule").on 'change', (e)->
-  try
-    app.rule = new BinaryTotalisticRule $("#fld-rule").val()
-    infobox.text "Rule set to #{app.rule}"
-  catch err
-    console.log ""+err
-    infobox.text "Error setting rule:"+err
+  $("#world-clear").click ->
+    app.world.clear()
+    app.needRepaint = true
     
-$("#fld-rule").trigger 'change'
-
-$("#btn-run-animation").on "click", (e)->
-  if app.animations.length is 0
-    a = new RotateAnimation 0.0002
-    app.startAnimation a
-  else
-    app.stopAnimation app.animations[0]
+  $("#fld-matrix").on 'change', (e)->
+    try
+      app.setLatticeMatrix parseMatrix $("#fld-matrix").val()
+      infobox.text "Lattice matrix set"
+    catch err
+      console.log ""+err
+      infobox.text ""+err
     
-$("#btn-go-home").on "click", (e)->app.navigateHome()
+  $("#fld-matrix").trigger 'change'
 
-$("#canvas").bind 'contextmenu', false
-$("#btn-zoom-in").on "click", ->app.zoomIn()
-$("#btn-zoom-out").on "click", ->app.zoomOut()
-$("#btn-step").on "click", ->app.step()
+  $("#fld-rule").on 'change', (e)->
+    try
+      app.rule = new BinaryTotalisticRule $("#fld-rule").val()
+      infobox.text "Rule set to #{app.rule}"
+    catch err
+      console.log ""+err
+      infobox.text "Error setting rule:"+err
+      
+  $("#fld-rule").trigger 'change'
 
+  $("#btn-run-animation").on "click", (e)->
+    if app.animations.length is 0
+      a = new RotateAnimation 0.0002
+      app.startAnimation a
+    else
+      app.stopAnimation app.animations[0]
+      
+  $("#btn-go-home").on "click", (e)->app.navigateHome()
 
-app.controller.attach $("canvas")
+  $("#canvas").bind 'contextmenu', false
+  $("#btn-zoom-in").on "click", ->app.zoomIn()
+  $("#btn-zoom-out").on "click", ->app.zoomOut()
+  $("#btn-step").on "click", ->app.step()
+  $(window).resize -> app.updateCanvasSize()
+    
 
+  app.controller.attach $("canvas")
 
-
-app.updateNavigator()      
-app.startAnimationLoop()
+  app.updateNavigator()      
+  app.startAnimationLoop()
