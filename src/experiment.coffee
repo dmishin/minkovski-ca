@@ -22,6 +22,7 @@ maxXY = (world)->
   m = null
   update = (x)->
     if x.isNegative() : x = x.multiply(-1)
+      
     if m is null
       m = x
     else if x.gt m

@@ -156,7 +156,7 @@ exports.ControllerHub = class ControllerHub
         @active = @secondary
       
     if @active isnt null
-      e.target.setCapture()
+      e.target.setCapture?()
       
       @active.mousedown e
       e.preventDefault()

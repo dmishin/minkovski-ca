@@ -40,6 +40,11 @@ exports.View = class View
 
     @selectedCell = [0,0] #null or [ix, iy] pair. Small integers, relative to the view center.
     @highlightedCell = null
+    @showConnection = true
+    @showEmpty = false
+
+    @styleConnectionLine = "#efe"
+    @styleEmptyCell = "@f0f0f0"
 
   setHighlightCell: (v)-> @highlightedCell = v
   incrementAngle: (da) ->
@@ -213,13 +218,22 @@ exports.View = class View
       [sx, sy] = M.mulv T, [ix,iy]
 
       cellCoord = @local2global [ix, iy]
-      if @world.getCell(cellCoord) isnt 0
+      if @world.getCell(cellCoord) is 0
+        if @showEmpty
+          #context.strokeStyle = @styleEmptyCell
+          context.beginPath()
+          context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
+          context.closePath()
+          context.stroke()        
+      else
         context.beginPath();
         context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
         context.closePath()
         context.fill()
-        if @world.connections isnt null
+        if @showConnection and (@world.connections isnt null)
           ccell = @world.connections.get cellCoord, null
+          #context.strokeStyle = @styleConnectionLine
+
           if ccell isnt null
             #iterate over alive neighbors of a cell
             for neighbor in ccell.neighbors when neighbor.value isnt 0

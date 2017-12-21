@@ -109,6 +109,13 @@ class Application
     @canvasCtl.height = @canvas.height = cont.innerHeight() | 0
     @needRepaint = true
     @needRepaintCtl = true
+
+  setShowConnection: (show)->
+    @view.showConnection = show
+    @needRepaint = true
+  setShowEmpty: (show) ->
+    @view.showEmpty = show
+    @needRepaint = true
     
 muls = (mtxs...) ->
   m = mtxs[0]
@@ -177,6 +184,10 @@ $(document).ready ->
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
+  
+  $("#cb-show-connections").on 'change', (e)->app.setShowConnection $(this).prop 'checked'
+  $("#cb-show-empty").on 'change', (e)->app.setShowEmpty $(this).prop 'checked'
+    
   $(window).resize -> app.updateCanvasSize()
     
 
