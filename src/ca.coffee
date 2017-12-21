@@ -205,5 +205,5 @@ exports.step = ( world, rule ) ->
     if newState isnt 0
       world.cells.put kv.k, newState
     #store new value in the new state too, in order to simplify neighbor calculation
-    kv.v.value = newState
+    #kv.v.value = newState
   return oldCells

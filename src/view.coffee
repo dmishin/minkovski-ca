@@ -236,7 +236,11 @@ exports.View = class View
 
           if ccell isnt null
             #iterate over alive neighbors of a cell
-            for neighbor in ccell.neighbors when neighbor.value isnt 0
+            for neighbor in ccell.neighbors
+              #to avoid double lines
+              continue if neighbor.coord.hash > cellCoord.hash
+              continue if @world.getCell(neighbor.coord) is 0
+              
               #find coordinates of the neighbor in screen coords
               [nix,niy] = B.mulv @viewMatrixBig, @center.offset neighbor.coord
               #if neighbor is relatively close
