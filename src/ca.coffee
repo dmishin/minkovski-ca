@@ -96,8 +96,6 @@ exports.commonNeighbors = commonNeighbors = (A, c, coord1, coord2, pap) ->
   decomp = conicsIntersection A, c, v, pap
   (coord1.translate(vi) for vi in decomp)
 
-
-
 #calls callback function for all different key-value pairs in the CustomHashMap
 exports.iterateItemPairs = iterateItemPairs = (customHashMap, onCellPair) ->
   previous = []
@@ -105,20 +103,6 @@ exports.iterateItemPairs = iterateItemPairs = (customHashMap, onCellPair) ->
     for kv1 in previous
       onCellPair kv, kv1
     previous.push kv
-
-
-class DerivedCell
-  constructor: (kv1, kv2)->
-    @parents = [kv1.k, kv2.k]
-    @values = [kv1.v, kv2.v]
-
-  #put new key-value pair if it is nto present yet.
-  put: (kv) ->
-    index = @parents.indexOf kv
-    if index is -1
-      @parents.push kv.k
-      @values.push kv.v
-    return
 
 class ConnectedCell
   #coord is stored for drawing purposes. ALso, to use "is" to check for equality. WIth coord, real equality check is needed.
@@ -131,6 +115,18 @@ class ConnectedCell
       true
     else
       false
+  removeNeighbor: (n)->
+    idx = @neighbors.indexOf n
+    if idx isnt -1
+      @neighbors.splice idx, 1
+    else
+      throw new Error "Attempt to remove neighbor that is already removed"
+  #calculate generalized neighbor sum for the derived cell
+  sum: (rule) ->
+    s = rule.foldInitial
+    for neighbor in @neighbors
+      s = rule.fold s, neighbor.value
+    s
 
 #Takes world and calculates enriched structure, where each cell knows its neighbors
 # and initially empty cells with 2 or more neighbors are present.
@@ -192,39 +188,6 @@ exports.calculateConnections = calculateConnections = (world)->
   #Done. Now return connections map
   connections  
   
-#GIven a World instance, find all new cells that are not present in the world,
-# and have at least 2 common neighbors with world cells
-exports.newNeighbors = newNeighbors = (world) ->
-  #Key is Coord instance. Value is an object:
-  #   list of cells with their values that have this neighbor
-  #   { neighbors: [] # list of Coord
-  #     values: [] }  # list of cell values
-  newCells = newCoordHash()
-
-  #iterate over all cell pairs in the world
-  iterateItemPairs world.cells, (kv1, kv2) ->
-    #each kv is a hashRecord instance, with k field being Coord (key) and v is cell value
-    for neighbor in commonNeighbors world.a, world.c, kv1.k, kv2.k
-      #Skip neighbors that are already present i nthe woprld
-      continue if world.cells.has neighbor
-
-      newRecord = newCells.get neighbor, null
-      if newRecord is null
-        newCells.put neighbor, new DerivedCell kv1, kv2
-      else
-        #register these cells in the derived
-        newRecord.put kv1
-        newRecord.put kv2
-        
-  return newCells
-
-
-#calculate generalized neighbor sum for the derived cell
-connectedCellSum = (cell, rule) ->
-  s = rule.foldInitial
-  for neighbor in cell.neighbors
-    s = rule.fold s, neighbor.value
-  return s
 
 #Evaluate one step of the world, using given rule
 exports.step = ( world, rule ) ->
@@ -232,11 +195,15 @@ exports.step = ( world, rule ) ->
   connections = calculateConnections world
   oldCells = world.cells
   world.cells = newCoordHash()
+  world.connections = connections
+  
   connections.iter (kv)->
-    sum = connectedCellSum kv.v, rule
+    sum = kv.v.sum rule
     state = kv.v.value
 
     newState = rule.next state, sum
     if newState isnt 0
       world.cells.put kv.k, newState
+    #store new value in the new state too, in order to simplify neighbor calculation
+    kv.v.value = newState
   return oldCells

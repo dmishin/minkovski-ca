@@ -76,8 +76,6 @@ describe "commonNeighbors", ->
           assert.equal ""+c, ""+pdist(cell, neigh), "Distance from neighbor ##{i} = #{neigh} between origin:#{origin} and cell:#{cell} to cell must be #{c}"
           
     assert.ok hadAnyNeighbor
-
-
   
 
 describe "iterateItemPairs", ->

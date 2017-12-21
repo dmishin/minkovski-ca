@@ -1,3 +1,5 @@
+M = require "./matrix2.coffee"
+
 getMousePos = (canvas, evt) ->
   rect = canvas.getBoundingClientRect()
   [evt.clientX - rect.left, evt.clientY - rect.top]
@@ -11,6 +13,20 @@ class BaseController
   mouse2local: (e)-> @app.view.screen2localInteger @app.canvas, getMousePos @app.canvas, e
   requestRepaint: ->
     @app.needRepaint = true
+  requestRepaintControls: ->
+    @app.needRepaintCtl = true
+
+class HighlightController extends BaseController
+  constructor: (app)->
+    super(app)
+    @lastHighlight = [0,0]
+    
+  mousemove: (e)->
+    hlCell = @mouse2local e
+    if not M.equal hlCell, @lastHighlight
+      @lastHighlight = hlCell
+      @app.view.setHighlightCell hlCell
+      @requestRepaintControls()  
   
 class ToggleCellController extends BaseController
   constructor: (app)->
@@ -48,7 +64,7 @@ class SelectCellController extends BaseController
   mousedown: (e)->
     localCell = @mouse2local e
     @app.view.selectedCell = localCell
-    @requestRepaint()
+    @requestRepaintControls()
 
 class SkewController extends BaseController
   constructor: (app)->
@@ -79,6 +95,7 @@ class SkewController extends BaseController
       #app.view.translateCenterLocal M.smul -1, @skewCenter
       @orig = pos
       @requestRepaint()
+      @requestRepaintControls()
     
       
 class MoveController extends BaseController
@@ -99,6 +116,7 @@ class MoveController extends BaseController
     if dx isnt 0 or dy isnt 0
       @app.view.translateCenterLocal [dx, dy]
       @requestRepaint()
+      @requestRepaintControls()
       @originLocal = [x,y]
       
   mouseup: (e)->
@@ -113,13 +131,16 @@ exports.ControllerHub = class ControllerHub
     @secondary = new SelectCellController(@app)
     @shiftPrimary = new SkewController(@app)
     @shiftSecondary = new MoveController(@app)
+    @idle = new HighlightController(@app)
     
     @active = null
     
   mousemove: (e)=>
     if @active isnt null
       @active.mousemove e
-      e.preventDefault()
+    else
+      @idle.mousemove e
+    e.preventDefault()
   mousedown: (e)=>
     if e.button is 0
       if e.shiftKey
@@ -135,6 +156,8 @@ exports.ControllerHub = class ControllerHub
         @active = @secondary
       
     if @active isnt null
+      e.target.setCapture()
+      
       @active.mousedown e
       e.preventDefault()
       
