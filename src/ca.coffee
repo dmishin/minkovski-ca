@@ -12,7 +12,7 @@ BM = require "./bigmatrix.coffee"
 #   p - big vector
 #   c - small number
 ###
-conicsIntersection = (a, c, p, pap) ->
+exports.conicsIntersection = conicsIntersection = (a, c, p, pap) ->
   #console.log {P:p}
 
   pap = pap ? BM.qformSmallA a, p
@@ -87,7 +87,77 @@ conicsIntersection = (a, c, p, pap) ->
   #console.log {twox1:twox1, twox2:twox2}
   return [twox1, twox2]
 
+### Intersection of 2 different conics:
+#   x'Ax = c1
+#   (x-p)'A(x-p) = c2
+#
+#   Returns 1 or 2 integer solutions or empty list, if no.
+#
+# \frac{
+#    p(c_1-c_2 + pap) + q\sqrt{
+#        -\frac1{da}\left((pap-c_1-c_2)^2-4c_1c_2\right)
+#    }
+#  }{
+#    2 pap
+#  }
+###
+exports.conicsIntersection2 = conicsIntersection2 = (a, c1, c2, p, pap) ->
+  pap = pap ? BM.qformSmallA a, p
+  if pap.isZero() then return []
+    
+  da = M.det(a)
+  ra = BM.tobig M.mul [0, -1, 1, 0], a
 
+  #expression under the root
+  # 1/da * ((pap-c_1-c_2)^2-4c_1c_2)
+  r = pap.subtract(c1+c2).square().subtract(4*c1*c2)
+
+  if ((da<0) and r.isNegative()) or ((da>0) and r.isPositive())
+    return []
+    
+  #console.log "r is = #{r}"
+  if r.isZero()
+    #special case of single intersection (touching hyperboloids or ellipses)
+    #
+    # p(c_1-c_2 + pap) / (2pap)
+    v = divIntVector BM.smul(pap.add(c1-c2), p), pap.multiply(2)
+    return if v is null then [] else [v]
+  
+  #divide by -da. if not divisible - no solution
+  {quotient:rda, remainder:rem} = r.divmod -da
+  return [] unless rem.isZero()
+
+  #calculate quare root
+  [sqrt_rda, isExactSquare] = sqrt rda
+  return [] unless isExactSquare
+
+  #coeff before p
+  # c_1-c_2 + pap
+  alpha = pap.add(c1-c2)
+
+  #finally, calculate the vector
+  scaled_p = BM.smul alpha, p
+  
+  scaled_q = BM.smul sqrt_rda, BM.mulv(ra, p)
+
+  #and their sum must be divisible by 2 pap
+  pap2 = pap.multiply 2
+
+  ret = []
+  v = divIntVector BM.addv(scaled_p,scaled_q), pap2
+  ret.push v if v isnt null
+  v = divIntVector BM.subv(scaled_p,scaled_q), pap2
+  ret.push v if v isnt null
+
+  return ret
+    
+divIntVector = ([x,y], k)->
+  {quotient: xk, remainder: r} = x.divmod(k)
+  return null unless r.isZero()
+  {quotient: yk, remainder: r} = y.divmod(k)
+  return null unless r.isZero()
+  [xk, yk]
+  
 #Find common neighbors of 2 cells. List of either 0, 1 or 2 Coord instances.
 # pap is optional, magnitude of the coord1-coord2 vector
 exports.commonNeighbors = commonNeighbors = (A, c, coord1, coord2, pap) ->
@@ -151,37 +221,52 @@ exports.calculateConnections = calculateConnections = (world)->
       # magniture of the distance vector, bigint.
       mag = world.pnorm2 dv
 
-      if mag.equals world.c
-        #if it is a neighbor, it must be a new neighbor. registe the connection without additional checks
-        richCell.neighbors.push richCell2
-        richCell2.neighbors.push richCell
+      for ci in world.c
+        if mag.equals ci
+          #if it is a neighbor, it must be a new neighbor. registe the connection without additional checks
+          richCell.neighbors.push richCell2
+          richCell2.neighbors.push richCell
+          break
       
       #also, these 2 cells might have common neighbor.
       # (is it possible when they are neighbors? At least, for some grids (hexagonal) it is true.
-      for dv1 in conicsIntersection world.a, world.c, dv, mag
-        neighborCoord = kv.k.translate dv1
-        #found at least 1 common neighbor.
-        # ignore it if it is one of the old cells
-        continue if world.cells.has neighborCoord
-        #OK, this neighbor referes to the previously empty place.
-        # is it present in the rich map?
-        richNeighborCell = connections.get neighborCoord
-        if not richNeighborCell?
-          #when it is not registered yet, then do it
-          richNeighborCell = new ConnectedCell neighborCoord, 0
-          connections.put neighborCoord, richNeighborCell
-          #and add its parents as neighbors, without checking.
-          richNeighborCell.neighbors.push richCell
-          richNeighborCell.neighbors.push richCell2
-          richCell.neighbors.push richNeighborCell
-          richCell2.neighbors.push richNeighborCell
-        else
-          #so, maybe this neighbor was already obtained as a neighbor of some other cells
-          # in this case, register neighbors with a care
-          if richNeighborCell.addNeighborIfNotYet richCell
-            richCell.neighbors.push richNeighborCell
-          if richNeighborCell.addNeighborIfNotYet richCell2
-            richCell2.neighbors.push richNeighborCell
+      for c1, i in world.c
+        for j in [0..i]
+          c2 = world.c[j]
+          intersections = if i is j
+            conicsIntersection world.a, c1, dv, mag
+          else
+            conicsIntersection2 world.a, c1, c2, dv, mag
+            
+          for dv1 in intersections
+            neighbors = if i is j
+              [kv.k.translate dv1]
+            else
+              [kv.k.translate(dv1), richCell2.coord.translateBack(dv1)]
+            
+            for neighborCoord in neighbors
+              #found at least 1 common neighbor.
+              # ignore it if it is one of the old cells
+              continue if world.cells.has neighborCoord
+              #OK, this neighbor referes to the previously empty place.
+              # is it present in the rich map?
+              richNeighborCell = connections.get neighborCoord
+              if not richNeighborCell?
+                #when it is not registered yet, then do it
+                richNeighborCell = new ConnectedCell neighborCoord, 0
+                connections.put neighborCoord, richNeighborCell
+                #and add its parents as neighbors, without checking.
+                richNeighborCell.neighbors.push richCell
+                richNeighborCell.neighbors.push richCell2
+                richCell.neighbors.push richNeighborCell
+                richCell2.neighbors.push richNeighborCell
+              else
+                #so, maybe this neighbor was already obtained as a neighbor of some other cells
+                # in this case, register neighbors with a care
+                if richNeighborCell.addNeighborIfNotYet richCell
+                  richCell.neighbors.push richNeighborCell
+                if richNeighborCell.addNeighborIfNotYet richCell2
+                  richCell2.neighbors.push richNeighborCell
       #done processing neighbors
     #done cycle over previous cells
     previous.push richCell

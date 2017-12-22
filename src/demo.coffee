@@ -16,6 +16,17 @@ parseMatrix = (code) ->
     throw new Error "Matrix code must have 4 parts"
   return (parseInt(part, 10) for part in parts)
 
+parseNeighborSamples = (code) ->
+  vectors = for svector in code.split ';'
+    svector = svector.trim()
+    parts = (parseInt(part,10) for part in svector.split(' ') when part)
+    if parts.length isnt 2
+      throw new Error("Neighbor vector must have 2 integer components, separated by spaces")
+    parts
+  if vectors.length is 0
+    throw new Error "Zero sample vectors: neighbors not defined"
+
+  return vectors
 
 class Application
   constructor: ->
@@ -35,7 +46,7 @@ class Application
     
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
-    @world = new World m, [1,0]
+    @world = new World m, [[1,0]]
     @view = new View @world
     @needRepaint = true
     
@@ -169,7 +180,15 @@ $(document).ready ->
       console.log ""+err
       infobox.text "Error setting rule:"+err
       
+  $("#fld-sample-neighbor").on 'change', (e)->
+    try
+      app.world.setNeighborVectors parseNeighborSamples $(this).val()
+    catch err
+      console.log err
+      infobox.text "Faield to set neighbors vectors:"+err
+    
   $("#fld-rule").trigger 'change'
+  $("#fld-sample-neighbor").trigger 'change'
 
   $("#btn-run-animation").on "click", (e)->
     if app.animations.length is 0

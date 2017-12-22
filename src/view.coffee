@@ -162,7 +162,8 @@ exports.View = class View
     
     if @selectedCell isnt null
       [selx, sely] = M.mulv T, @selectedCell
-      @drawEquidistant canvas, context, selx+dx, sely+dy, @world.c
+      for ci in @world.c
+        @drawEquidistant canvas, context, selx+dx, sely+dy, ci
       
       context.beginPath();
       context.arc(selx+dx, sely+dy, @cellSize*1.5, 0, Math.PI*2, true)
@@ -204,8 +205,6 @@ exports.View = class View
     iquad  = (M.mulv(invT, vi) for vi in quad)
 
     context.clearRect(0, 0, canvas.width, canvas.height)
-
-    dmin = Math.sqrt @world.c
     #get points and draw them
 
     invViewBig = B.adjoint @viewMatrixBig

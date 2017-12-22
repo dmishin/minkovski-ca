@@ -78,6 +78,7 @@ exports.qformSmallA = ([a,b,c,d],[x1, x2]) ->
   y1.add(y2).add(y3)
 
 exports.addv = ([x1,x2], [y1,y2]) -> [x1.add(y1), x2.add(y2)]
+exports.subv = ([x1,x2], [y1,y2]) -> [x1.subtract(y1), x2.subtract(y2)]
 
 exports.pow = pow = (m, n) ->
   if n < 0

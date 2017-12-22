@@ -19,6 +19,7 @@ exports.Coord = class Coord
     (@hash is that.hash) and (@x.equals that.x) and (@y.equals that.y)
 
   translate: ([dx,dy]) -> new Coord @x.add(dx), @y.add(dy)
+  translateBack: ([dx,dy]) -> new Coord @x.subtract(dx), @y.subtract(dy)
   #vector from this to that
   offset: (that) -> [that.x.subtract(@x), that.y.subtract(@y)]
   
@@ -29,11 +30,10 @@ rot45 = M.rot(Math.PI * -0.25)
 exports.newCoordHash = newCoordHash = -> new CustomHashMap(((c)->c.hash), ((c1,c2)->c1.equals(c2)))
 
 exports.World = class World
-  constructor: (skewMatrix, neighborVector)->
+  constructor: (skewMatrix, [neighborVectors])->
     @cells = newCoordHash()
     @connections = null
     @m = skewMatrix
-    @x0 = neighborVector
 
     #;paing matrix details
     throw new Error "matrix determinant is not 1" unless M.det(@m) is 1
@@ -43,7 +43,7 @@ exports.World = class World
     
     @m_inv = M.adjoint @m #inverse skew matrix (adjoint is fine because det=1)
     @a = tfm2qform @m   #conic (pseudonorm) matrix.
-    @c = qform @a, @x0  #pseudonorm of the neighbor vector
+    @c = (qform(@a, x0) for x0 in neighborVectors)  #pseudonorm of the neighbor vector
 
     if M.det(@a) is 0 then throw new Error("Quadratic norm matrix is degenerate: #{JSON.stringify @a}")
 
@@ -61,12 +61,8 @@ exports.World = class World
     @latticeMatrix = M.mul vv, rot45
     @_sampledata()
     
-  setNeighborVector: (neighborVector)->
-    c = qform @a, neighborVector  #pseudonorm of the neighbor vector
-    if c is 0
-      Error "Vector #{JSON.stringify c} is null-vector for given grid matrix"
-    @x0 = neighborVector
-    @c = c
+  setNeighborVectors: (neighborVectors)->
+    @c = (qform(@a, x0) for x0 in neighborVectors)
 
   _sampledata: ->
     put = (x,y) => @cells.put(new Coord(bigInt(x), bigInt(y)), 1)

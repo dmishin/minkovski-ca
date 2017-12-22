@@ -49,12 +49,12 @@ describe "Coord", ->
 describe "World", ->
   it "must support creation with corrrect parameters", ->
 
-    assert.doesNotThrow ->  new World [2, 1, 1, 1], [1,0]
-    assert.doesNotThrow ->  new World [0, 1, -1, 0], [1,0]
+    assert.doesNotThrow ->  new World [2, 1, 1, 1], [[1,0]]
+    assert.doesNotThrow ->  new World [0, 1, -1, 0], [[1,0]]
 
   it "must raise error with incorrect skew matrix", ->
-    assert.throws -> new World [1,1,1,1], [1,0]
-    assert.throws -> new World [1,2,-1,1], [1,0]
-    assert.throws -> new World [1,0,0,1], [1,0]
+    assert.throws -> new World [1,1,1,1], [[1,0]]
+    assert.throws -> new World [1,2,-1,1], [[1,0]]
+    assert.throws -> new World [1,0,0,1], [[1,0]]
 
   
