@@ -105,3 +105,68 @@ describe "iterateItemPairs", ->
       callNumber += 1
     assert.equal callNumber, 1
     
+
+describe "conicsIntersection2", ->
+  #conicsIntersection2 = (a, c1, c2, p, pap) ->
+
+  m = [2,1,1,1]
+  a = tfm2qform m
+  c1 = qform a, [1,0]
+  c2 = qform a, [0,1]
+
+  bigVec = (x,y) -> [bigInt(x), bigInt(y)]
+
+  it "must return nothing for zero vector",->
+    
+    assert.deepEqual [], CA.conicsIntersection2 a, c1, c2, bigVec(0,0)
+    
+  it "must decompose [1,0] + [0,1]",->
+    ints = CA.conicsIntersection2 a, c1, c2, bigVec(1,1)
+    assert.ok ints.length>0, "Must have at least 1 intersection"
+    foundExpected = false
+    for [x,y] in ints
+      if x.equals(1) and y.equals(0)
+        foundExpected = true
+    assert.ok foundExpected, "Must find point [1,0]"
+      
+
+  it "must find at least some intersections in +-100 range and they must be correct, a=#{JSON.stringify a}, c1=#{c1}, c2=#{c2}", ->
+    numIntersections = 0
+    numTests = 0
+    for x in [-100 .. 100]
+      for y in [-100 .. 100]
+        numTests += 1
+        p = bigVec(x,y)
+        ints = CA.conicsIntersection2 a, c1, c2, p
+        continue if ints.length is 0
+
+        numIntersections += 1
+
+        #check the intersection
+
+        for v in ints
+          assert.ok BM.qformSmallA(a,v).equals(c1), "Magnitude from (#{v[0]},#{v[1]}) to (0,0) must be #{c1}"
+          assert.ok BM.qformSmallA(a,BM.subv(v,p)).equals(c2), "Magnitude from (#{v[0]},#{v[1]}) to (#{p[0]},#{p[1]}) must be #{c2}"
+    assert.ok numIntersections>3, "Must find at least 3 intersection"
+    assert.ok numIntersections<numTests-1, "Must has less than #{numTests-1} intersections"
+  
+  
+
+  it "must return the same value as simple intersection if c1=c2, for intersections in +-100 range, a=#{JSON.stringify a}, c1=c2", ->
+    
+    for x in [-100 .. 100]
+      for y in [-100 .. 100]
+        for c in [c1,c2]
+          p = bigVec(x,y)
+          ints2 = CA.conicsIntersection2 a, c, c, p
+          ints = CA.conicsIntersection a, c, p
+
+          assert.equal ints2.length, ints.length
+          for v in ints2
+            any = false
+            for v1 in ints
+              if v[0].equals(v1[0]) and v[1].equals(v1[1])
+                any = true
+                break
+            assert.ok any, "Must have one vector equal to #{v}, found none, in intersection with p=#{p}, c=#{c}, A=#{JSON.stringify a}"
+    return

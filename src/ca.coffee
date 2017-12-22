@@ -12,7 +12,7 @@ BM = require "./bigmatrix.coffee"
 #   p - big vector
 #   c - small number
 ###
-conicsIntersection = (a, c, p, pap) ->
+exports.conicsIntersection = conicsIntersection = (a, c, p, pap) ->
   #console.log {P:p}
 
   pap = pap ? BM.qformSmallA a, p
@@ -87,7 +87,77 @@ conicsIntersection = (a, c, p, pap) ->
   #console.log {twox1:twox1, twox2:twox2}
   return [twox1, twox2]
 
+### Intersection of 2 different conics:
+#   x'Ax = c1
+#   (x-p)'A(x-p) = c2
+#
+#   Returns 1 or 2 integer solutions or empty list, if no.
+#
+# \frac{
+#    p(c_1-c_2 + pap) + q\sqrt{
+#        -\frac1{da}\left((pap-c_1-c_2)^2-4c_1c_2\right)
+#    }
+#  }{
+#    2 pap
+#  }
+###
+exports.conicsIntersection2 = conicsIntersection2 = (a, c1, c2, p, pap) ->
+  pap = pap ? BM.qformSmallA a, p
+  if pap.isZero() then return []
+    
+  da = M.det(a)
+  ra = BM.tobig M.mul [0, -1, 1, 0], a
 
+  #expression under the root
+  # 1/da * ((pap-c_1-c_2)^2-4c_1c_2)
+  r = pap.subtract(c1+c2).square().subtract(4*c1*c2)
+
+  if ((da<0) and r.isNegative()) or ((da>0) and r.isPositive())
+    return []
+    
+  #console.log "r is = #{r}"
+  if r.isZero()
+    #special case of single intersection (touching hyperboloids or ellipses)
+    #
+    # p(c_1-c_2 + pap) / (2pap)
+    v = divIntVector BM.smul(pap.add(c1-c2), p), pap.multiply(2)
+    return if v is null then [] else [v]
+  
+  #divide by -da. if not divisible - no solution
+  {quotient:rda, remainder:rem} = r.divmod -da
+  return [] unless rem.isZero()
+
+  #calculate quare root
+  [sqrt_rda, isExactSquare] = sqrt rda
+  return [] unless isExactSquare
+
+  #coeff before p
+  # c_1-c_2 + pap
+  alpha = pap.add(c1-c2)
+
+  #finally, calculate the vector
+  scaled_p = BM.smul alpha, p
+  
+  scaled_q = BM.smul sqrt_rda, BM.mulv(ra, p)
+
+  #and their sum must be divisible by 2 pap
+  pap2 = pap.multiply 2
+
+  ret = []
+  v = divIntVector BM.addv(scaled_p,scaled_q), pap2
+  ret.push v if v isnt null
+  v = divIntVector BM.subv(scaled_p,scaled_q), pap2
+  ret.push v if v isnt null
+
+  return ret
+    
+divIntVector = ([x,y], k)->
+  {quotient: xk, remainder: r} = x.divmod(k)
+  return null unless r.isZero()
+  {quotient: yk, remainder: r} = y.divmod(k)
+  return null unless r.isZero()
+  [xk, yk]
+  
 #Find common neighbors of 2 cells. List of either 0, 1 or 2 Coord instances.
 # pap is optional, magnitude of the coord1-coord2 vector
 exports.commonNeighbors = commonNeighbors = (A, c, coord1, coord2, pap) ->
@@ -205,5 +275,5 @@ exports.step = ( world, rule ) ->
     if newState isnt 0
       world.cells.put kv.k, newState
     #store new value in the new state too, in order to simplify neighbor calculation
-    kv.v.value = newState
+    #kv.v.value = newState
   return oldCells
