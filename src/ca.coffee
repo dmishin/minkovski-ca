@@ -221,37 +221,52 @@ exports.calculateConnections = calculateConnections = (world)->
       # magniture of the distance vector, bigint.
       mag = world.pnorm2 dv
 
-      if mag.equals world.c
-        #if it is a neighbor, it must be a new neighbor. registe the connection without additional checks
-        richCell.neighbors.push richCell2
-        richCell2.neighbors.push richCell
+      for ci in world.c
+        if mag.equals ci
+          #if it is a neighbor, it must be a new neighbor. registe the connection without additional checks
+          richCell.neighbors.push richCell2
+          richCell2.neighbors.push richCell
+          break
       
       #also, these 2 cells might have common neighbor.
       # (is it possible when they are neighbors? At least, for some grids (hexagonal) it is true.
-      for dv1 in conicsIntersection world.a, world.c, dv, mag
-        neighborCoord = kv.k.translate dv1
-        #found at least 1 common neighbor.
-        # ignore it if it is one of the old cells
-        continue if world.cells.has neighborCoord
-        #OK, this neighbor referes to the previously empty place.
-        # is it present in the rich map?
-        richNeighborCell = connections.get neighborCoord
-        if not richNeighborCell?
-          #when it is not registered yet, then do it
-          richNeighborCell = new ConnectedCell neighborCoord, 0
-          connections.put neighborCoord, richNeighborCell
-          #and add its parents as neighbors, without checking.
-          richNeighborCell.neighbors.push richCell
-          richNeighborCell.neighbors.push richCell2
-          richCell.neighbors.push richNeighborCell
-          richCell2.neighbors.push richNeighborCell
-        else
-          #so, maybe this neighbor was already obtained as a neighbor of some other cells
-          # in this case, register neighbors with a care
-          if richNeighborCell.addNeighborIfNotYet richCell
-            richCell.neighbors.push richNeighborCell
-          if richNeighborCell.addNeighborIfNotYet richCell2
-            richCell2.neighbors.push richNeighborCell
+      for c1, i in world.c
+        for j in [0..i]
+          c2 = world.c[j]
+          intersections = if i is j
+            conicsIntersection world.a, c1, dv, mag
+          else
+            conicsIntersection2 world.a, c1, c2, dv, mag
+            
+          for dv1 in intersections
+            neighbors = if i is j
+              [kv.k.translate dv1]
+            else
+              [kv.k.translate(dv1), richCell2.coord.translateBack(dv1)]
+            
+            for neighborCoord in neighbors
+              #found at least 1 common neighbor.
+              # ignore it if it is one of the old cells
+              continue if world.cells.has neighborCoord
+              #OK, this neighbor referes to the previously empty place.
+              # is it present in the rich map?
+              richNeighborCell = connections.get neighborCoord
+              if not richNeighborCell?
+                #when it is not registered yet, then do it
+                richNeighborCell = new ConnectedCell neighborCoord, 0
+                connections.put neighborCoord, richNeighborCell
+                #and add its parents as neighbors, without checking.
+                richNeighborCell.neighbors.push richCell
+                richNeighborCell.neighbors.push richCell2
+                richCell.neighbors.push richNeighborCell
+                richCell2.neighbors.push richNeighborCell
+              else
+                #so, maybe this neighbor was already obtained as a neighbor of some other cells
+                # in this case, register neighbors with a care
+                if richNeighborCell.addNeighborIfNotYet richCell
+                  richCell.neighbors.push richNeighborCell
+                if richNeighborCell.addNeighborIfNotYet richCell2
+                  richCell2.neighbors.push richNeighborCell
       #done processing neighbors
     #done cycle over previous cells
     previous.push richCell
