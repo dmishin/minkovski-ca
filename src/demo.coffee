@@ -8,6 +8,7 @@ M = require "./matrix2.coffee"
 {ControllerHub}= require "./controller.coffee"
 CA = require "./ca.coffee"
 {BinaryTotalisticRule} = require "./rule.coffee"
+hotkeys = require "hotkeys"
 
 parseMatrix = (code) ->
   code = code.trim()
@@ -85,7 +86,8 @@ class Application
       
   navigateHome: ->
     @view.setLocation makeCoord(0,0), 0
-    @needRepaint = true  
+    @needRepaint = true
+    @needRepaintCtl = true
     @updateNavigator()
 
   updateNavigator: ->
@@ -207,7 +209,17 @@ $(document).ready ->
   
   $("#cb-show-connections").on 'change', (e)->app.setShowConnection $(this).prop 'checked'
   $("#cb-show-empty").on 'change', (e)->app.setShowEmpty $(this).prop 'checked'
-    
+
+  kbDispatcher = new hotkeys.Dispatcher
+  kbDispatcher.getKeymap()
+  kbDispatcher.on "n", ->app.step()
+  kbDispatcher.on "[", ->app.zoomIn()
+  kbDispatcher.on "]", ->app.zoomOut()
+  kbDispatcher.on "c", ->
+    app.world.clear()
+    app.needRepaint = true
+  kbDispatcher.on "h", ->app.navigateHome()
+  
   $(window).resize -> app.updateCanvasSize()
     
 
