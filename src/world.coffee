@@ -30,7 +30,7 @@ rot45 = M.rot(Math.PI * -0.25)
 exports.newCoordHash = newCoordHash = -> new CustomHashMap(((c)->c.hash), ((c1,c2)->c1.equals(c2)))
 
 exports.World = class World
-  constructor: (skewMatrix, [neighborVectors])->
+  constructor: (skewMatrix, neighborVectors)->
     @cells = newCoordHash()
     @connections = null
     @m = skewMatrix

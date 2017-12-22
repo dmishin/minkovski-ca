@@ -107,6 +107,7 @@ class Application
   zoomOut: -> @zoomBy Math.pow(10, -0.2)
   zoomBy: (k) ->
     @view.scale *= k
+    @needRepaintCtl = true
     @needRepaint = true
 
   step: ->
@@ -199,7 +200,7 @@ $(document).ready ->
       
   $("#btn-go-home").on "click", (e)->app.navigateHome()
 
-  $("#canvas #canvas-controls").bind 'contextmenu', false
+  $("#canvas,#canvas-controls").bind 'contextmenu', false
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
