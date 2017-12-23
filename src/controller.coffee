@@ -35,7 +35,8 @@ class ToggleCellController extends BaseController
     @writingValue = 1
     @prevCell = null
     
-  mousedown: (e)->  
+  mousedown: (e)->
+    @value = @app.stateSelector.activeState
     localCell = @mouse2local e
     globalCell = @app.view.local2global localCell
     if @app.world.getCell(globalCell) is 0
@@ -134,7 +135,7 @@ exports.ControllerHub = class ControllerHub
     @idle = new HighlightController(@app)
     
     @active = null
-    
+
   mousemove: (e)=>
     if @active isnt null
       @active.mousemove e

@@ -59,7 +59,6 @@ exports.World = class World
     #Normalized projection of the lattice.
     vv = M.orthoDecomp @a  
     @latticeMatrix = M.mul vv, rot45
-    @_sampledata()
     
   setNeighborVectors: (neighborVectors)->
     @c = (qform(@a, x0) for x0 in neighborVectors)

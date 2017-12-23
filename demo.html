@@ -27,11 +27,21 @@
 	<button id="btn-step">Step (N)</button>
 	<input id="cb-show-connections" type="checkbox" checked/><label for="cb-show-connections">Show neighbor connections</label>
 	<input id="cb-show-empty" type="checkbox"/><label for="cb-show-empty">Show empty cells</label>
+	<div>
+	  <input id="fld-random-size" value="10"/><input id="fld-random-percent" value="30"/>
+	  <button id="btn-random-fill">Random fill (R)</button>
+	</div>
+	<div>
+	  <textarea id="fld-custom-rule-code"></textarea>
+	  <button id="btn-set-custom-rule">Set rule</button>
+	</div>
 	
       </div>
+      
       <div id="info">Info box</div>
     </div>
     <div id="canvas-container" class="vertical-main-screen">
+      <div id="state-selector" ></div>
       <div class="canvas-stack">
 	<canvas id="canvas" width="40" height="40" >
 	  No canvas support

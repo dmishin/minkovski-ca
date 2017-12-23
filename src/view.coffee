@@ -36,7 +36,7 @@ exports.View = class View
     @angle = 0.0
     @scale = 8
     @cellSize = 4
-    @palette = ["#fe8f0f", "#f7325e", "#7dc410", "#fef8cf", "#0264ed"]
+    @palette = ["#000000", "#fe8f0f", "#f7325e", "#7dc410", "#0264ed"]
 
     @selectedCell = [0,0] #null or [ix, iy] pair. Small integers, relative to the view center.
     @highlightedCell = null
@@ -217,7 +217,8 @@ exports.View = class View
       [sx, sy] = M.mulv T, [ix,iy]
 
       cellCoord = @local2global [ix, iy]
-      if @world.getCell(cellCoord) is 0
+      cellState = @world.getCell(cellCoord)
+      if cellState is 0
         if @showEmpty
           #context.strokeStyle = @styleEmptyCell
           context.beginPath()
@@ -228,6 +229,7 @@ exports.View = class View
         context.beginPath();
         context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
         context.closePath()
+        context.fillStyle = @palette[(cellState-1)%@palette.length]
         context.fill()
         if @showConnection and (@world.connections isnt null)
           ccell = @world.connections.get cellCoord, null

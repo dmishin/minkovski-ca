@@ -40,3 +40,17 @@ canvas{
 #canvas-controls{
     z-index: 1;
 }
+
+#state-selector{
+    /*put it on top of others*/
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    left: auto;
+    right: auto;
+}
+
+button.state{
+    border:0;
+    
+}

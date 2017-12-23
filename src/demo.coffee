@@ -7,7 +7,7 @@ M = require "./matrix2.coffee"
 {World, makeCoord}= require "./world.coffee"
 {ControllerHub}= require "./controller.coffee"
 CA = require "./ca.coffee"
-{BinaryTotalisticRule} = require "./rule.coffee"
+{BinaryTotalisticRule, CustomRule} = require "./rule.coffee"
 hotkeys = require "hotkeys"
 
 parseMatrix = (code) ->
@@ -44,6 +44,7 @@ class Application
     @needRepaintCtl = true
     @controller = new ControllerHub this
     @rule = new BinaryTotalisticRule "B3S2 3"
+    @stateSelector = new StateSelector this
     
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
@@ -130,6 +131,73 @@ class Application
   setShowEmpty: (show) ->
     @view.showEmpty = show
     @needRepaint = true
+  randomFill: (size, percent)->
+    x0 = -((size/2)|0)
+    x1 = size + x0
+    rand = -> Math.round(Math.random()*size + x0) | 0
+      
+    numCells = (size**2*percent)|0
+    for x in [x0...x1]
+      for y in [x0...x1]
+        c = makeCoord rand(), rand()
+        if Math.random() <= percent
+          @world.setCell c, 1
+    return
+    
+  onRandomFill: ->
+    try
+      size = parseInt $("#fld-random-size").val(), 10
+      throw new Error("Bad size") if size <=0 or size > 10000
+      percent = parseFloat $("#fld-random-percent").val()
+      throw new Error("Bad percent") if percent < 0 or percent > 100
+    
+      @world.clear()  
+      @randomFill size, percent*0.01
+    catch err
+      console.log err
+    @needRepaint=true
+
+  setRule: (rule) ->
+    @rule = rule
+    @stateSelector.setNumStates rule.states
+
+
+class StateSelector
+  constructor: (@app)->
+    @elem = $("#state-selector")
+    @nstates = 1
+    @buttons = []
+    @_updateSelector()
+    @activeState = 1
+    
+  setNumStates: (n)->
+    return if n is @nstates
+    if n < 2 then throw new Error "Number os states can't be < 2"
+      
+    @nstates = n
+    @_updateSelector()
+    if @nstates is 2
+      @elem.hide()
+    else
+      @elem.show()
+      
+  _updateSelector: ->
+    #create buttons for each state
+    @elem.empty()
+    @buttons = for s in [1..@nstates]
+      btn = $("<button>#{s}</button>")
+      if s is @activeState
+        btn.addClass "selected-state"
+      btn.on 'click', do (s)=>(e)=>@_onStateSelected s, e
+      @elem.append btn
+      btn
+      
+  _onStateSelected: (s, e)->
+    return if s is @activeState
+    @buttons[@activeState-1].removeClass 'selected-state'
+    @buttons[s-1].addClass 'selected-state'
+    @activeState = s
+    console.log "selected state #{s}"
     
 muls = (mtxs...) ->
   m = mtxs[0]
@@ -177,7 +245,7 @@ $(document).ready ->
 
   $("#fld-rule").on 'change', (e)->
     try
-      app.rule = new BinaryTotalisticRule $("#fld-rule").val()
+      app.setRule( new BinaryTotalisticRule $("#fld-rule").val() )
       infobox.text "Rule set to #{app.rule}"
     catch err
       console.log ""+err
@@ -206,10 +274,16 @@ $(document).ready ->
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
-  
+  $("#btn-random-fill").on "click", -> app.onRandomFill()
   $("#cb-show-connections").on 'change', (e)->app.setShowConnection $(this).prop 'checked'
   $("#cb-show-empty").on 'change', (e)->app.setShowEmpty $(this).prop 'checked'
-
+  $("#btn-set-custom-rule").on 'click', (e)->
+    try
+      app.setRule new CustomRule $("#fld-custom-rule-code").val()
+      infobox.text("Successfully set custom rule")
+    catch e
+      infobox.text("Error settign rule: #{e}")
+      
   kbDispatcher = new hotkeys.Dispatcher
   kbDispatcher.getKeymap()
   kbDispatcher.on "n", ->app.step()
@@ -219,7 +293,7 @@ $(document).ready ->
     app.world.clear()
     app.needRepaint = true
   kbDispatcher.on "h", ->app.navigateHome()
-  
+  kbDispatcher.on "r", ->app.onRandomFill()
   $(window).resize -> app.updateCanvasSize()
     
 
