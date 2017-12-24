@@ -139,9 +139,9 @@ class Application
     numCells = (size**2*percent)|0
     for x in [x0...x1]
       for y in [x0...x1]
-        c = makeCoord rand(), rand()
         if Math.random() <= percent
-          @world.setCell c, 1
+          c = makeCoord rand(), rand()
+          @world.setCell c, 1+Math.floor(Math.random()*(@rule.states-1))|0
     return
     
   onRandomFill: ->
@@ -184,7 +184,7 @@ class StateSelector
   _updateSelector: ->
     #create buttons for each state
     @elem.empty()
-    @buttons = for s in [1..@nstates]
+    @buttons = for s in [1...@nstates]
       btn = $("<button>#{s}</button>")
       if s is @activeState
         btn.addClass "selected-state"
