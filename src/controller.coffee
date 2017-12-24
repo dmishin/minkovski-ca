@@ -99,8 +99,27 @@ class CopyController extends BaseController
     @app.view.clearSelectionBox()
     @requestRepaintControls()
 
-    console.log cells
+    #console.log cells
+    @app.controller.paste.selection = cells
     
+class PasteController extends BaseController
+  constructor: (app)->
+    super(app)
+    @selection = null
+    @lastHighlight = [0,0]
+    
+  mousemove: (e)->
+    return if @selection is null
+    
+    hlCell = @mouse2local e
+    if not M.equal hlCell, @lastHighlight
+      @lastHighlight = hlCell
+      @app.view.setPasteLocation hlCell, @selection
+      @requestRepaintControls()
+      
+  mousedown: (e)->
+    pass
+  
 
 class SkewController extends BaseController
   constructor: (app)->
@@ -162,13 +181,16 @@ class MoveController extends BaseController
 
 exports.ControllerHub = class ControllerHub
   constructor: (@app)->
+
+    @paste = new PasteController(@app)
     
     @primary = new ToggleCellController(@app)
     #@secondary = new SelectCellController(@app)
     @secondary = new CopyController(@app)
     @shiftPrimary = new SkewController(@app)
     @shiftSecondary = new MoveController(@app)
-    @idle = new HighlightController(@app)
+    #@@idle = new HighlightController(@app)
+    @idle=@paste
     
     @active = null
 

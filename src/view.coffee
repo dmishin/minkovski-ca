@@ -46,6 +46,9 @@ exports.View = class View
     @styleConnectionLine = "#efe"
     @styleEmptyCell = "@f0f0f0"
     @selectionBox = null
+    
+    @pasteLocation = null
+    @pasteSelection = null
 
   setSelectionBox: (p1, p2) -> @selectionBox = [p1,p2]
   clearSelectionBox: -> @selectionBox = null
@@ -217,6 +220,16 @@ exports.View = class View
       context.closePath()
       context.strokeStyle = "#0808ff"
       context.stroke()
+    if @pasteLocation isnt null and @pasteSelection isnt null
+      [px, py]=@pasteLocation
+      for [x,y,s] in @pasteSelection
+        [sx,sy] = M.mulv T, [x+px, y+py]
+
+        context.beginPath();
+        context.arc(sx+dx, sy+dy, @cellSize, 0, Math.PI*2, true)
+        context.closePath()
+        context.strokeStyle = @palette[(s-1)%@palette.length]
+        context.stroke()
       
     if @selectionBox isnt null
       [[x1,y1],[x2,y2]] = @selectionBox
@@ -229,7 +242,10 @@ exports.View = class View
 
   #map "local" to "screen"
   _combinedViewMatrix: -> M.smul @scale, M.mul @viewMatrix, M.inv(@world.latticeMatrix)
-  
+  setPasteLocation: (localCell, selection)->
+    @pasteLocation = localCell
+    @pasteSelection = selection
+    
   drawGrid: (canvas, context)->
     scale = @scale
     width = canvas.width
