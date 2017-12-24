@@ -153,6 +153,7 @@ class Application
     
       @world.clear()  
       @randomFill size, percent*0.01
+      @updatePopulation()
     catch err
       console.log err
     @needRepaint=true

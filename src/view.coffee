@@ -45,7 +45,46 @@ exports.View = class View
 
     @styleConnectionLine = "#efe"
     @styleEmptyCell = "@f0f0f0"
+    @selectionBox = null
 
+  setSelectionBox: (p1, p2) -> @selectionBox = [p1,p2]
+  clearSelectionBox: -> @selectionBox = null
+  copySelection: (canvas)->
+    if @selectionBox is null then return null
+    dx = canvas.width/2
+    dy = canvas.height/2
+    [[x1,y1], [x2,y2]] = @selectionBox
+    x1 -= dx
+    y1 -= dy
+    x2 -= dx
+    y2 -= dy
+    T = @_combinedViewMatrix()
+    invT = M.inv T
+    #quad in the screen coordinates
+    quad = [ [x1, y1], [x2, y1], [x2, y2], [x1, y2]]
+
+    #transform it to the integer lattice
+    iquad  = (M.mulv(invT, vi) for vi in quad)
+    
+    invViewBig = B.adjoint @viewMatrixBig
+
+    points = []
+    sumx = 0
+    sumy = 0
+    convexQuadPoints iquad, (ix, iy) =>
+      # [ix,iy] is in the "local" coordinates.
+      cellCoord = @local2global [ix, iy]
+      cellState = @world.getCell(cellCoord)    
+      if cellState isnt 0
+        points.push [ix, iy, cellState]
+        sumx += ix
+        sumy += iy
+    if points.length isnt 0
+      xc = (sumx/points.length)|0
+      yc = (sumy/points.length)|0
+      points = ([x-xc,y-yc,s] for [x,y,s] in points)
+    return points
+    
   setHighlightCell: (v)-> @highlightedCell = v
   incrementAngle: (da) ->
     @angle += da
@@ -177,7 +216,12 @@ exports.View = class View
       context.arc(hx+dx, hy+dy, @cellSize*1.5, 0, Math.PI*2, true)
       context.closePath()
       context.strokeStyle = "#0808ff"
-      context.stroke()      
+      context.stroke()
+      
+    if @selectionBox isnt null
+      [[x1,y1],[x2,y2]] = @selectionBox
+      context.fillStyle = "rgba(0,0,255,0.3)"
+      context.fillRect x1, y1, x2-x1, y2-y1
       
     #context.save()
     #context.translate width/2, height/2

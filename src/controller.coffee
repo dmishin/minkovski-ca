@@ -48,6 +48,8 @@ class ToggleCellController extends BaseController
     
     @app.world.setCell globalCell, @writingValue
     @requestRepaint()
+    @app.updatePopulation()
+    
   mousemove: (e)->
     return if @prevCell is null
     curCell = @mouse2local e
@@ -57,7 +59,10 @@ class ToggleCellController extends BaseController
     @app.world.setCell globalCell, @writingValue
     @prevCell = curCell
     
-    @requestRepaint() if oldValue isnt @writingValue
+    if oldValue isnt @writingValue
+      @requestRepaint()
+      @app.updatePopulation()
+      
   mouseup: (e)->
     @prevCell = null
       
@@ -66,6 +71,36 @@ class SelectCellController extends BaseController
     localCell = @mouse2local e
     @app.view.selectedCell = localCell
     @requestRepaintControls()
+
+class CopyController extends BaseController
+  constructor: (app)->
+    super(app)
+    @dragging = false
+    @p0 = null
+    @p1 = null
+    
+  mousedown: (e)->
+    @dragging = true
+    @p0 = getMousePos @app.canvas, e
+    @p1 = @p0
+    @_updateSelection()
+    
+  _updateSelection: ->
+    @app.view.setSelectionBox( @p0, @p1 )
+    @requestRepaintControls()
+    
+  mousemove: (e)->
+    if @dragging
+      @p1 = getMousePos @app.canvas, e
+      @_updateSelection()
+
+  mouseup: (e)->
+    cells = @app.view.copySelection(@app.canvas)
+    @app.view.clearSelectionBox()
+    @requestRepaintControls()
+
+    console.log cells
+    
 
 class SkewController extends BaseController
   constructor: (app)->
@@ -129,7 +164,8 @@ exports.ControllerHub = class ControllerHub
   constructor: (@app)->
     
     @primary = new ToggleCellController(@app)
-    @secondary = new SelectCellController(@app)
+    #@secondary = new SelectCellController(@app)
+    @secondary = new CopyController(@app)
     @shiftPrimary = new SkewController(@app)
     @shiftSecondary = new MoveController(@app)
     @idle = new HighlightController(@app)
@@ -173,3 +209,4 @@ exports.ControllerHub = class ControllerHub
 
   attach: (canvas)->
     canvas.mousedown(@mousedown).mouseup(@mouseup).mousemove(@mousemove)
+
