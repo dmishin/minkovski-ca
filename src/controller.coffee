@@ -100,7 +100,7 @@ class CopyController extends BaseController
     @requestRepaintControls()
 
     #console.log cells
-    @app.controller.paste.selection = cells
+    @app.setSelection cells
     
 class PasteController extends BaseController
   constructor: (app)->

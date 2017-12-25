@@ -161,7 +161,34 @@ class Application
   setRule: (rule) ->
     @rule = rule
     @stateSelector.setNumStates rule.states
+    
+  setSelection: (cells, updateUI=true) ->
+    @controller.paste.selection = cells
+    if updateUI
+      $("#fld-selection").val if cells is null
+        ""
+      else
+        cellList2Text(cells)
 
+cellList2Text = (cells)->("#{x} #{y} #{s}" for [x,y,s] in cells).join(";")
+sortCellList = (cells)->
+  cells.sort (vals1, vals2)->
+    for v1, i in vals1
+      v2 = vals2[i]
+      return -1 if v1 < v2 
+      return 1  if v2 > v2
+    return 0
+  return cells
+  
+parseCellList = (text)->
+  console.log text
+  for part in text.split ";" when part
+    m = /(-?\d+)\s+(-?\d+)\s+(\d+)/.exec part.trim()
+    if m is null then throw new Error("Bad format of cell list: #{part}")
+    x = parseInt m[1], 10
+    y = parseInt m[2], 10
+    s = parseInt m[3], 10
+    [x,y,s]
 
 class StateSelector
   constructor: (@app)->
@@ -284,6 +311,9 @@ $(document).ready ->
       infobox.text("Successfully set custom rule")
     catch e
       infobox.text("Error settign rule: #{e}")
+  $("#btn-set-selection").on 'click', (e)->
+    
+    app.setSelection parseCellList($("#fld-selection").val()), false #do not update UI
       
   kbDispatcher = new hotkeys.Dispatcher
   kbDispatcher.getKeymap()
