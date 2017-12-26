@@ -281,7 +281,7 @@ exports.step = ( world, rule ) ->
   oldCells = world.cells
   world.cells = newCoordHash()
   world.connections = connections
-  
+  rule.begin()  
   connections.iter (kv)->
     sum = kv.v.sum rule
     state = kv.v.value
@@ -291,4 +291,5 @@ exports.step = ( world, rule ) ->
       world.cells.put kv.k, newState
     #store new value in the new state too, in order to simplify neighbor calculation
     #kv.v.value = newState
+  rule.end()  
   return oldCells
