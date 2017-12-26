@@ -45,6 +45,7 @@ class Application
     @controller = new ControllerHub this
     @rule = new BinaryTotalisticRule "B3S2 3"
     @stateSelector = new StateSelector this
+    @prevState = null
     
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
@@ -114,7 +115,7 @@ class Application
     @needRepaint = true
 
   step: ->
-    CA.step @world, @rule
+    @prevState = CA.step @world, @rule
     @updatePopulation()
     @needRepaint = true
     
@@ -157,7 +158,12 @@ class Application
     catch err
       console.log err
     @needRepaint=true
-
+  onUndo: ->
+    if @prevState isnt null
+      @world.cells = @prevState
+      @prevState = null
+      @needRepaint=true
+      
   setRule: (rule) ->
     @rule = rule
     @stateSelector.setNumStates rule.states
@@ -295,6 +301,8 @@ $(document).ready ->
     app.needRepaint = true
   kbDispatcher.on "h", ->app.navigateHome()
   kbDispatcher.on "r", ->app.onRandomFill()
+  kbDispatcher.on "z", ->app.onUndo()
+  
   $(window).resize -> app.updateCanvasSize()
     
 

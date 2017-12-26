@@ -192,8 +192,8 @@ exports.ControllerHub = class ControllerHub
     @paste = new PasteController(@app)
     
     @primary = new ToggleCellController(@app)
-    #@secondary = new SelectCellController(@app)
-    @secondary = new CopyController(@app)
+    @secondary = new SelectCellController(@app)
+    #@secondary = new CopyController(@app)
     @shiftPrimary = new SkewController(@app)
     @shiftSecondary = new MoveController(@app)
     @idle=@paste
