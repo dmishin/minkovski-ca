@@ -10,6 +10,9 @@ CA = require "./ca.coffee"
 {BinaryTotalisticRule, CustomRule} = require "./rule.coffee"
 hotkeys = require "hotkeys"
 
+MAX_SCALE = 100
+MIN_SCALE = 5
+
 parseMatrix = (code) ->
   code = code.trim()
   parts = code.split /\s+/
@@ -110,7 +113,7 @@ class Application
   zoomIn: -> @zoomBy Math.pow(10, 0.2)
   zoomOut: -> @zoomBy Math.pow(10, -0.2)
   zoomBy: (k) ->
-    @view.scale *= k
+    @view.scale = Math.min MAX_SCALE, Math.max MIN_SCALE, @view.scale*k
     @needRepaintCtl = true
     @needRepaint = true
 
@@ -195,6 +198,7 @@ class StateSelector
       btn = $("<button>#{s}</button>")
       if s is @activeState
         btn.addClass "selected-state"
+      btn.css "background-color", @app.view.getStateColor s
       btn.on 'click', do (s)=>(e)=>@_onStateSelected s, e
       @elem.append btn
       btn
@@ -290,7 +294,11 @@ $(document).ready ->
       infobox.text("Successfully set custom rule")
     catch e
       infobox.text("Error settign rule: #{e}")
-      
+
+  $("#cb-show-connections").trigger 'change'
+  $("#cb-show-empty").trigger 'change'
+
+            
   kbDispatcher = new hotkeys.Dispatcher
   kbDispatcher.getKeymap()
   kbDispatcher.on "n", ->app.step()
