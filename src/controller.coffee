@@ -34,8 +34,10 @@ class ToggleCellController extends BaseController
     @value = 1
     @writingValue = 1
     @prevCell = null
+    @drawing = false
     
   mousedown: (e)->
+    @drawing = true
     @value = @app.stateSelector.activeState
     localCell = @mouse2local e
     globalCell = @app.view.local2global localCell
@@ -51,20 +53,25 @@ class ToggleCellController extends BaseController
     @app.updatePopulation()
     
   mousemove: (e)->
-    return if @prevCell is null
     curCell = @mouse2local e
-    return if (curCell[0] is @prevCell[0]) and (curCell[1] is @prevCell[1])
-    globalCell = @app.view.local2global curCell
-    oldValue = @app.world.getCell globalCell
-    @app.world.setCell globalCell, @writingValue
+    return if (@prevCell isnt null) and (M.equal curCell, @prevCell)
     @prevCell = curCell
     
-    if oldValue isnt @writingValue
-      @requestRepaint()
-      @app.updatePopulation()
+    if @drawing
+      globalCell = @app.view.local2global curCell
+      oldValue = @app.world.getCell globalCell
+      @app.world.setCell globalCell, @writingValue
       
+      if oldValue isnt @writingValue
+        @requestRepaint()
+        @app.updatePopulation()
+    else
+      #highlighting
+      @app.view.setHighlightCell curCell
+      @requestRepaintControls()  
+        
   mouseup: (e)->
-    @prevCell = null
+    @drawing = false
       
 class SelectCellController extends BaseController
   mousedown: (e)->
@@ -189,10 +196,9 @@ exports.ControllerHub = class ControllerHub
     @secondary = new CopyController(@app)
     @shiftPrimary = new SkewController(@app)
     @shiftSecondary = new MoveController(@app)
-    #@@idle = new HighlightController(@app)
     @idle=@paste
     
-    @active = null
+    @active = @primary
 
   mousemove: (e)=>
     if @active isnt null
@@ -227,7 +233,7 @@ exports.ControllerHub = class ControllerHub
       catch err
         console.log err
       e.preventDefault()
-      @active = null
+      @active = @primary
 
   attach: (canvas)->
     canvas.mousedown(@mousedown).mouseup(@mouseup).mousemove(@mousemove)
