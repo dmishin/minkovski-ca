@@ -40,6 +40,7 @@ exports.View = class View
     @palette = ["#000000", "#fe8f0f", "#f7325e", "#7dc410", "#0264ed"]
     @equidistantColor = "#808080"
     @emptyCellColor = "#c0c0c0"
+    @connectionLineColor = "rgba(127,127,127,0.5)"
     
     @selectedCell = [0,0] #null or [ix, iy] pair. Small integers, relative to the view center.
     @highlightedCell = null
@@ -298,7 +299,8 @@ exports.View = class View
         context.fill()
         if @showConnection and (@world.connections isnt null)
           ccell = @world.connections.get cellCoord, null
-          #context.strokeStyle = @styleConnectionLine
+
+          context.strokeStyle = @connectionLineColor
 
           if ccell isnt null
             #iterate over alive neighbors of a cell
