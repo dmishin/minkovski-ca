@@ -36,15 +36,18 @@ exports.View = class View
     @angle = 0.0
     @scale = 8
     @cellSize = 4
+    
     @palette = ["#000000", "#fe8f0f", "#f7325e", "#7dc410", "#0264ed"]
-
+    @equidistantColor = "#808080"
+    @emptyCellColor = "#c0c0c0"
+    @connectionLineColor = "rgba(127,127,127,0.5)"
+    
     @selectedCell = [0,0] #null or [ix, iy] pair. Small integers, relative to the view center.
     @highlightedCell = null
     @showConnection = true
     @showEmpty = false
 
     @styleConnectionLine = "#efe"
-    @styleEmptyCell = "@f0f0f0"
     @selectionBox = null
     
     @pasteLocation = null
@@ -185,7 +188,8 @@ exports.View = class View
           context.moveTo x, y
         else
           context.lineTo x, y
-    context.strokeStyle="red"
+    context.strokeStyle = @equidistantColor
+    context.setLineDash [5, 5]
     context.stroke()
     
     #find intersection points
@@ -228,7 +232,7 @@ exports.View = class View
         context.beginPath();
         context.arc(sx+dx, sy+dy, @cellSize, 0, Math.PI*2, true)
         context.closePath()
-        context.strokeStyle = @palette[(s-1)%@palette.length]
+        context.strokeStyle = @getStateColor s
         context.stroke()
       
     if @selectionBox isnt null
@@ -245,7 +249,9 @@ exports.View = class View
   setPasteLocation: (localCell, selection)->
     @pasteLocation = localCell
     @pasteSelection = selection
-    
+
+  getStateColor: (s) -> @palette[(s-1)%@palette.length]
+  
   drawGrid: (canvas, context)->
     scale = @scale
     width = canvas.width
@@ -280,7 +286,7 @@ exports.View = class View
       cellState = @world.getCell(cellCoord)
       if cellState is 0
         if @showEmpty
-          #context.strokeStyle = @styleEmptyCell
+          context.strokeStyle =@emptyCellColor
           context.beginPath()
           context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
           context.closePath()
@@ -289,11 +295,12 @@ exports.View = class View
         context.beginPath();
         context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
         context.closePath()
-        context.fillStyle = @palette[(cellState-1)%@palette.length]
+        context.fillStyle = @getStateColor cellState
         context.fill()
         if @showConnection and (@world.connections isnt null)
           ccell = @world.connections.get cellCoord, null
-          #context.strokeStyle = @styleConnectionLine
+
+          context.strokeStyle = @connectionLineColor
 
           if ccell isnt null
             #iterate over alive neighbors of a cell

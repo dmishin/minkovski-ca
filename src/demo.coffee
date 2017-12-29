@@ -10,6 +10,9 @@ CA = require "./ca.coffee"
 {BinaryTotalisticRule, CustomRule} = require "./rule.coffee"
 hotkeys = require "hotkeys"
 
+MAX_SCALE = 100
+MIN_SCALE = 5
+
 parseMatrix = (code) ->
   code = code.trim()
   parts = code.split /\s+/
@@ -45,6 +48,7 @@ class Application
     @controller = new ControllerHub this
     @rule = new BinaryTotalisticRule "B3S2 3"
     @stateSelector = new StateSelector this
+    @prevState = null
     
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
@@ -109,12 +113,12 @@ class Application
   zoomIn: -> @zoomBy Math.pow(10, 0.2)
   zoomOut: -> @zoomBy Math.pow(10, -0.2)
   zoomBy: (k) ->
-    @view.scale *= k
+    @view.scale = Math.min MAX_SCALE, Math.max MIN_SCALE, @view.scale*k
     @needRepaintCtl = true
     @needRepaint = true
 
   step: ->
-    CA.step @world, @rule
+    @prevState = CA.step @world, @rule
     @updatePopulation()
     @needRepaint = true
     
@@ -157,7 +161,12 @@ class Application
     catch err
       console.log err
     @needRepaint=true
-
+  onUndo: ->
+    if @prevState isnt null
+      @world.cells = @prevState
+      @prevState = null
+      @needRepaint=true
+      
   setRule: (rule) ->
     @rule = rule
     @stateSelector.setNumStates rule.states
@@ -216,6 +225,7 @@ class StateSelector
       btn = $("<button>#{s}</button>")
       if s is @activeState
         btn.addClass "selected-state"
+      btn.css "background-color", @app.view.getStateColor s
       btn.on 'click', do (s)=>(e)=>@_onStateSelected s, e
       @elem.append btn
       btn
@@ -315,6 +325,10 @@ $(document).ready ->
     
     app.setSelection parseCellList($("#fld-selection").val()), false #do not update UI
       
+
+  $("#cb-show-connections").trigger 'change'
+  $("#cb-show-empty").trigger 'change'
+
   kbDispatcher = new hotkeys.Dispatcher
   kbDispatcher.getKeymap()
   kbDispatcher.on "n", ->app.step()
@@ -325,6 +339,8 @@ $(document).ready ->
     app.needRepaint = true
   kbDispatcher.on "h", ->app.navigateHome()
   kbDispatcher.on "r", ->app.onRandomFill()
+  kbDispatcher.on "z", ->app.onUndo()
+  
   $(window).resize -> app.updateCanvasSize()
     
 

@@ -31,7 +31,8 @@ exports.BinaryTotalisticRule = class BinaryTotalisticRule
       keys.sort (a,b)->a-b
       keys
     "B#{tablekeys(@tables[0]).join ' '} S#{tablekeys(@tables[1]).join ' '}"
-
+  begin: ->
+  end: ->
   
 
 exports.CustomRule = CustomRule = class
@@ -53,4 +54,8 @@ exports.CustomRule = CustomRule = class
   fold: (prev, neighborValue) -> prev + neighborValue
     
   toString : -> @code
+
+  #Callbacks for user support
+  begin: ->
+  end: ->
     
