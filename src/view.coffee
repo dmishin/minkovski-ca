@@ -53,6 +53,9 @@ exports.View = class View
     @pasteLocation = null
     @pasteSelection = null
 
+    @showCenter = true
+    @guideColor = "rgba(50,50,200,.5)"
+
   setSelectionBox: (p1, p2) -> @selectionBox = [p1,p2]
   clearSelectionBox: -> @selectionBox = null
   copySelection: (canvas)->
@@ -205,7 +208,15 @@ exports.View = class View
     #invT = M.inv T
 
     context.clearRect(0, 0, canvas.width, canvas.height)
-    
+    if @showCenter
+      context.strokeStyle = @guideColor
+      context.beginPath()
+      context.moveTo width*0.4, dy
+      context.lineTo width*0.6, dy
+      context.moveTo dx, height*0.4
+      context.lineTo dx, height*0.6
+      context.stroke()
+      
     if @selectedCell isnt null
       [selx, sely] = M.mulv T, @selectedCell
       for ci in @world.c
