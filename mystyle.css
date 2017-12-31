@@ -51,6 +51,33 @@ canvas{
 }
 
 button.state{
+    border:0;    
+}
+
+button.toggle{
+    opacity:50%;
+    padding:0.5em;
+    margin:0;
     border:0;
-    
+    border-radius: 3px;
+
+    color: #888;
+}
+button.toggle:hover{
+    border: solid blue 1px;
+    margin: -1px;
+}
+
+button.pressed{
+    color: #000;
+}
+
+input.short{
+    width: 2em;
+}
+input.mid{
+    width: 5em;
+}
+input.long{
+    width: 7em;
 }

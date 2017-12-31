@@ -16,19 +16,35 @@
 	</table>
       </div>
       <div id="parameters">
-	Matrix: <input id="fld-matrix" value="2 1 1 1"/>
-	Rule: <input id="fld-rule" value="B3S2 3" />
-	Sample neighbor: <input id="fld-sample-neighbor" value="1 0"/>
+	Matrix: <input id="fld-matrix" value="2 1 1 1" class="mid"/><br/>
+	Rule: <input id="fld-rule" value="B3S2 3" class="long"/><br/>
+	Sample neighbor: <input id="fld-sample-neighbor" value="1 0" class="mid" title="List of sample neighbor vectors, must have at least 1 vector. Vectors are separated by semicolon."/><br/>
+
 	<button id="btn-run-animation">Animate</button>
 	<button id="world-clear">Clear (C)</button>
 	<button id="btn-go-home">Home (H)</button>
 	<button id="btn-zoom-in">+ ([)</button>
 	<button id="btn-zoom-out">- (])</button>
 	<button id="btn-step">Step (N)</button>
-	<input id="cb-show-connections" type="checkbox" checked/><label for="cb-show-connections">Show neighbor connections</label>
-	<input id="cb-show-empty" type="checkbox"/><label for="cb-show-empty">Show empty cells</label>
+
 	<div>
-	  <input id="fld-random-size" value="10"/><input id="fld-random-percent" value="30"/>
+	  View:<br/>
+	  
+	  <button id="tb-view-connections" class="toggle" title="Show neighbor connections">C</button>
+	  <button id="tb-view-empty" class="toggle" title="Show empty cells">E</button>
+	  <button id="tb-view-center" class="toggle pressed" title="Show view center">X</button>
+	</div>
+	
+	<div>
+	  <input id="fld-random-size" class="short"/><select id="fld-random-percent">
+	    <option value="10">10</option>
+	    <option value="20">20</option>
+	    <option value="30" selected>30</option>
+	    <option value="40">40</option>
+	    <option value="50">50</option>
+	    <option value="60">60</option>
+	    <option value="70">70</option>
+	  </select>
 	  <button id="btn-random-fill">Random fill (R)</button>
 	</div>
 	<div>

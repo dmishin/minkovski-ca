@@ -12,6 +12,7 @@ hotkeys = require "hotkeys"
 
 MAX_SCALE = 100
 MIN_SCALE = 5
+LOG10 = Math.log 10
 
 parseMatrix = (code) ->
   code = code.trim()
@@ -100,12 +101,12 @@ class Application
       $("#navi-squeeze").text("--")
     else
       #its a logarithm of a squeeze
-      lsqueeze = @view.getTotalAngle()
-      
-      $("#navi-squeeze").text( if lsqueeze >= 0
-        "#{Math.exp lsqueeze}"
-      else
-        "1/#{Math.exp -lsqueeze}")
+      log10squeeze = Math.round(@view.getTotalAngle() / LOG10) | 0
+
+      if @lastLog10Squeeze isnt log10squeeze
+        $("#navi-squeeze").html "10<sup>#{log10squeeze}</sup>"
+        @lastLog10Squeeze = log10squeeze
+
     $("#navi-x").text ""+@view.center.x
     $("#navi-y").text ""+@view.center.y
   updatePopulation: ->
@@ -132,9 +133,15 @@ class Application
   setShowConnection: (show)->
     @view.showConnection = show
     @needRepaint = true
+    
   setShowEmpty: (show) ->
     @view.showEmpty = show
     @needRepaint = true
+    
+  setShowCenter: (show)->
+    @view.showCenter = show
+    @needRepaintCtl = true
+    
   randomFill: (size, percent)->
     x0 = -((size/2)|0)
     x1 = size + x0
@@ -152,10 +159,11 @@ class Application
     try
       size = parseInt $("#fld-random-size").val(), 10
       throw new Error("Bad size") if size <=0 or size > 10000
-      percent = parseFloat $("#fld-random-percent").val()
+      percent = parseFloat $("#fld-random-percent option:selected").val()
       throw new Error("Bad percent") if percent < 0 or percent > 100
     
-      @world.clear()  
+      @world.clear()
+      console.log [size, percent*0.01]
       @randomFill size, percent*0.01
       @updatePopulation()
     catch err
@@ -216,6 +224,14 @@ muls = (mtxs...) ->
     m = M.mul m, mi
   return m
 
+defineToggleButton = (jqElement, onToggle)->
+  jqElement.on 'click', ->
+    jqthis = $ this
+    val = not jqthis.hasClass 'pressed'
+    jqthis.toggleClass 'pressed'
+    onToggle val
+  onToggle jqElement.hasClass 'pressed'
+
 class RotateAnimation
   constructor: (@anglePerSec)->
   start: ->
@@ -232,6 +248,11 @@ class RotateAnimation
       app.view.incrementAngle @anglePerSec * dt
       app.needRepaint = true
     @lastTimeStamp = timestamp
+
+class SmartDispatcher extends hotkeys.Dispatcher
+  _dispatch: (evt)->
+    unless evt.target.tagName.toLowerCase() in ['textarea']
+      super._dispatch(evt)
 
 $(document).ready ->
   infobox = $ "#info"
@@ -265,6 +286,7 @@ $(document).ready ->
   $("#fld-sample-neighbor").on 'change', (e)->
     try
       app.world.setNeighborVectors parseNeighborSamples $(this).val()
+      app.needRepaintCtl=true
     catch err
       console.log err
       infobox.text "Faield to set neighbors vectors:"+err
@@ -280,14 +302,11 @@ $(document).ready ->
       app.stopAnimation app.animations[0]
       
   $("#btn-go-home").on "click", (e)->app.navigateHome()
-
   $("#canvas,#canvas-controls").bind 'contextmenu', false
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
   $("#btn-random-fill").on "click", -> app.onRandomFill()
-  $("#cb-show-connections").on 'change', (e)->app.setShowConnection $(this).prop 'checked'
-  $("#cb-show-empty").on 'change', (e)->app.setShowEmpty $(this).prop 'checked'
   $("#btn-set-custom-rule").on 'click', (e)->
     try
       app.setRule new CustomRule $("#fld-custom-rule-code").val()
@@ -295,11 +314,11 @@ $(document).ready ->
     catch e
       infobox.text("Error settign rule: #{e}")
 
-  $("#cb-show-connections").trigger 'change'
-  $("#cb-show-empty").trigger 'change'
-
+  defineToggleButton $("#tb-view-empty"), (show)->app.setShowEmpty show
+  defineToggleButton $("#tb-view-center"), (show)->app.setShowCenter show
+  defineToggleButton $("#tb-view-connections"), (show)->app.setShowConnection show
             
-  kbDispatcher = new hotkeys.Dispatcher
+  kbDispatcher = new SmartDispatcher
   kbDispatcher.getKeymap()
   kbDispatcher.on "n", ->app.step()
   kbDispatcher.on "[", ->app.zoomIn()
