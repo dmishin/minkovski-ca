@@ -55,7 +55,18 @@ exports.View = class View
 
     @showCenter = true
     @guideColor = "rgba(50,50,200,.5)"
+    @showStateNumbers = true
+    @stateFont = "15px Arial"
 
+  setWorld: (w) ->
+    @world=w
+    @viewMatrix = M.eye()
+    @viewMatrixBig = B.eye()
+    @center = makeCoord 0, 0
+    @integerRotationsCount = 0
+    @angle = 0.0    
+    
+    
   setSelectionBox: (p1, p2) -> @selectionBox = [p1,p2]
   clearSelectionBox: -> @selectionBox = null
   copySelection: (canvas)->
@@ -99,11 +110,11 @@ exports.View = class View
     @angle += da
     if @angle < -0.51*@world.angle
       @angle += @world.angle
-      @integerRotationsCount += 1
+      @integerRotationsCount -= 1
       @_premultiplyViewMatrixBy @world.m
     else if @angle > 0.51*@world.angle
       @angle -= @world.angle
-      @integerRotationsCount -= 1
+      @integerRotationsCount += 1
       @_premultiplyViewMatrixBy M.adjoint @world.m
       
     @setAngle @angle
@@ -125,11 +136,12 @@ exports.View = class View
     @center = newCenter
     nRotations = fullAngle / @world.angle
     fullRoations = Math.round(nRotations)|0
+    @integerRotationsCount = fullRoations
     @setAngle fullAngle - fullRoations*@world.angle
-    @viewMatrixBig = if fullRoations >= 0
-      B.pow @world.m, fullRoations
+    @viewMatrixBig = if fullRoations <= 0
+      B.pow B.tobig(@world.m), -fullRoations
     else
-      B.pow B.adjoint(@world.m), -fullRoations
+      B.pow B.adjoint(B.tobig(@world.m)), fullRoations
     
     
   
@@ -268,6 +280,10 @@ exports.View = class View
     width = canvas.width
     height = canvas.height
 
+    if @showStateNumbers
+      context.font = @stateFont
+      context.textAlign = "center"
+
     dx = width * 0.5
     dy = height * 0.5
 
@@ -303,11 +319,19 @@ exports.View = class View
           context.closePath()
           context.stroke()        
       else
-        context.beginPath();
-        context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
-        context.closePath()
-        context.fillStyle = @getStateColor cellState
-        context.fill()
+        
+        if @showStateNumbers
+          context.fillStyle = @getStateColor cellState
+          t = ""+cellState
+          context.fillText t, sx, sy
+        else
+          context.beginPath();
+          context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
+          context.closePath()
+          context.fillStyle = @getStateColor cellState
+          context.fill()
+        
+          
         if @showConnection and (@world.connections isnt null)
           ccell = @world.connections.get cellCoord, null
 

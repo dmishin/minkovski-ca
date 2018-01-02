@@ -9,6 +9,8 @@ M = require "./matrix2.coffee"
 CA = require "./ca.coffee"
 {BinaryTotalisticRule, CustomRule} = require "./rule.coffee"
 hotkeys = require "hotkeys"
+URLSearchParams = require 'url-search-params'
+bigInt = require "big-integer"
 
 MAX_SCALE = 100
 MIN_SCALE = 5
@@ -54,7 +56,10 @@ class Application
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
     @world = new World m, [[1,0]]
-    @view = new View @world
+    if @view is null
+      @view = new View @world
+    else
+      @view.setWorld @world
     @needRepaint = true
     
   repaintView: ->
@@ -130,6 +135,10 @@ class Application
     @needRepaint = true
     @needRepaintCtl = true
 
+  setShowStateNumbers: (show)->
+    @view.showStateNumbers = show
+    @needRepaint=true
+    
   setShowConnection: (show)->
     @view.showConnection = show
     @needRepaint = true
@@ -178,7 +187,96 @@ class Application
   setRule: (rule) ->
     @rule = rule
     @stateSelector.setNumStates rule.states
+    
+  setSelection: (cells, updateUI=true) ->
+    @controller.paste.selection = cells
+    if updateUI
+      $("#fld-selection").val if cells is null
+        ""
+      else
+        cellList2Text(cells)
+  saveToUrlParams: ->
+    params = new URLSearchParams
+    params.set 'matrix', @world.m.join(' ')
+    params.set 'neighbors', $("#fld-sample-neighbor").val()
+    params.set 'center', "#{@view.center.x},#{@view.center.y}"
+    params.set 'angle', ""+@view.getTotalAngle()
+    if @rule instanceof BinaryTotalisticRule
+      params.set 'rule', ""+@rule
+    else if @rule instanceof CustomRule
+      params.set 'customrule', ""+@rule
 
+    if @world.population() > 0
+      params.set 'cells', cellList2Text @world.getCellList()
+    return params
+        
+  loadFromUrlParams: (params)->
+    if params.has 'matrix'
+      try
+        mtx = params.get 'matrix'
+        @setLatticeMatrix parseMatrix mtx
+        $("#fld-matrix").val(mtx)
+      catch err
+        alert "Bad matrix in url: #{mtx}, #{err}"
+        return
+    if params.has 'neighbors'
+      try
+        neighbors = params.get 'neighbors'
+        @world.setNeighborVectors parseNeighborSamples neighbors
+        $("#fld-sample-neighbor").val(neighbors)
+      catch err
+        alert "Bad neighbor samepls in url: #{neighbors}, #{err}"
+        return
+        
+    if params.has 'center'
+      [sx,sy] = params.get('center').split(',')
+      center = makeCoord sx, sy
+    else
+      center = makeCoord 0, 0
+    if params.has 'angle'
+      angle = parseFloat params.get 'angle'
+      throw new Error("bad angle: #{angle}") if angle isnt angle
+    else
+      angle = 0.0
+
+    @view.setLocation center, angle
+      
+    if params.has 'cells'
+      cells = parseCellListBig params.get 'cells'
+      for [x,y,s] in cells
+        @world.setCell makeCoord(x,y),s
+
+    if params.has 'rule'
+      @setRule new BinaryTotalisticRule params.get 'rule'
+      $("#fld-rule").val( ""+@rule )
+    if params.has 'customrule'
+      @setRule new CustomRule params.get 'customrule'
+      $("#fld-custom-rule-code").val params.get 'customrule'
+    @needRepaint=true
+    @needRepaintCtl=true
+
+cellList2Text = (cells)->("#{x} #{y} #{s}" for [x,y,s] in cells).join(";")
+sortCellList = (cells)->
+  cells.sort (vals1, vals2)->
+    for v1, i in vals1
+      v2 = vals2[i]
+      return -1 if v1 < v2 
+      return 1  if v2 > v2
+    return 0
+  return cells
+
+parseCellList = (text)-> _parseCellListImpl text, (s)->parseInt(s,10)
+parseCellListBig = (text)-> _parseCellListImpl text, bigInt
+
+_parseCellListImpl = (text, intParser)->
+  console.log text
+  for part in text.split ";" when part
+    m = /(-?\d+)\s+(-?\d+)\s+(\d+)/.exec part.trim()
+    if m is null then throw new Error("Bad format of cell list: #{part}")
+    x = intParser m[1]
+    y = intParser m[2]
+    s = parseInt m[3], 10
+    [x,y,s]
 
 class StateSelector
   constructor: (@app)->
@@ -204,6 +302,7 @@ class StateSelector
     @elem.empty()
     @buttons = for s in [1...@nstates]
       btn = $("<button>#{s}</button>")
+      btn.addClass "state"
       if s is @activeState
         btn.addClass "selected-state"
       btn.css "background-color", @app.view.getStateColor s
@@ -249,16 +348,98 @@ class RotateAnimation
       app.needRepaint = true
     @lastTimeStamp = timestamp
 
+class ExclusiveButtonGroup
+  constructor: (ids)->
+    @pressedClass = "pressed"
+    @active = null
+    buttons = ($("#"+id) for id in ids)
+    for btn in buttons
+      btn.on 'click', (e)=>@_clicked(e)
+      if btn.hasClass @pressedClass
+        if @active is null
+          @active = btn
+        else
+          btn.removeClass @pressedClass
+    return
+     
+  _clicked: (e)->
+    target = $(e.target)
+    return if target.hasClass @pressedClass
+    if @active isnt null
+      @active.removeClass @pressedClass
+    target.addClass @pressedClass
+    @active = target
+      
 class SmartDispatcher extends hotkeys.Dispatcher
   _dispatch: (evt)->
     unless evt.target.tagName.toLowerCase() in ['textarea']
       super._dispatch(evt)
+      
+CodeSamples = 
+  basic: """//Basic custom rule that re-implements binary rule "B3 S2 3"
+//Commented code is the same as default behavior
+{
+  //states: 2,
+  //foldInitial: 0,
+  //fold: function(sum, state){return sum+state;},
+  next: function(state, sum){
+    if (state===0){
+      return (sum===3) ? 1 : 0;
+    }else if(state===1){
+      return (sum===2 || sum===3) ? 1 : 0;
+    }
+  }
+}
+""",
+  advanced:"""//Advanced code sample, that has several states and counts neighbors of each state separately
+//It also shows how custom fields coud be added to the rule
+{
+  states: 9,
+  foldInitial: null,
+  fold: function(sum, s){
+    if(s===0) return sum;
+    if(sum===null){
+	    sum=new Array(this.states-1);
+	    for(var i=0; i!=sum.length; ++i) sum[i] = 0;
+	  }
+	  sum[s-1] += 1;
+	  return sum
+  },
+  //rule is defined by this table, keys are strings, composed of cell state and sorted neighbor states
+  map:{
+    "1 22":1,
+    "2 1344": 5,
+    "3 244": 6,
+    "4 234": 7,
+    "4 234": 7,
+    "0 14": 8,
+    "1 5588": 1,
+    "7 5678":  3,
+    "7 567": 0,
+    "8 17": 2,
+    "0 78": 4,
+    "2 13444": 5,
+    "1 558888": 1,
+  },
+  next: function(s, sum){
+    var sss=""+s+" ";
+    if (sum!=null){
+      for(var i=0; i!=sum.length; i++){
+    		var si = sum[i];
+        for(var j=0;j!=si;j++)
+  		    sss = sss + (i+1);
+      }
+    }
+    if (this.map.hasOwnProperty(sss))
+      return this.map[sss];
+    else
+      return 0;
+  }
+}
+"""
 
 $(document).ready ->
-  infobox = $ "#info"
-  infobox.text "Loaded"
   app = new Application $("#canvas").get(0)
-
   app.updateCanvasSize()
   
   $("#world-clear").click ->
@@ -268,20 +449,20 @@ $(document).ready ->
   $("#fld-matrix").on 'change', (e)->
     try
       app.setLatticeMatrix parseMatrix $("#fld-matrix").val()
-      infobox.text "Lattice matrix set"
+      #infobox.text "Lattice matrix set"
     catch err
       console.log ""+err
-      infobox.text ""+err
+      #infobox.text ""+err
     
   $("#fld-matrix").trigger 'change'
 
   $("#fld-rule").on 'change', (e)->
     try
       app.setRule( new BinaryTotalisticRule $("#fld-rule").val() )
-      infobox.text "Rule set to #{app.rule}"
+      #infobox.text "Rule set to #{app.rule}"
     catch err
       console.log ""+err
-      infobox.text "Error setting rule:"+err
+      #infobox.text "Error setting rule:"+err
       
   $("#fld-sample-neighbor").on 'change', (e)->
     try
@@ -289,7 +470,7 @@ $(document).ready ->
       app.needRepaintCtl=true
     catch err
       console.log err
-      infobox.text "Faield to set neighbors vectors:"+err
+      #infobox.text "Faield to set neighbors vectors:"+err
     
   $("#fld-rule").trigger 'change'
   $("#fld-sample-neighbor").trigger 'change'
@@ -310,25 +491,83 @@ $(document).ready ->
   $("#btn-set-custom-rule").on 'click', (e)->
     try
       app.setRule new CustomRule $("#fld-custom-rule-code").val()
-      infobox.text("Successfully set custom rule")
+      #infobox.text("Successfully set custom rule")
+      $("#popup-custom-rule").hide()
     catch e
-      infobox.text("Error settign rule: #{e}")
+      alert ""+e
+  $("#btn-set-custom-rule-cancel").on 'click', -> $("#popup-custom-rule").hide()
+      
+  if $("#fld-custom-rule-code").val()
+    $("#btn-set-custom-rule").trigger 'click'
+  $("#btn-show-custom-rule-help").on 'click', -> $('#custom-rule-help').toggle()
+      
+  $("#btn-set-selection").on 'click', (e)->
+    app.setSelection parseCellList($("#fld-selection").val()), false #do not update UI
+  $("#btn-rot180-selection").on 'click', (e)->
+    sel = parseCellList($("#fld-selection").val())
+    app.setSelection ([-x,-y,s] for [x,y,s] in sel), true #update UI
+    app.needRepaintCtl=true
+  $("#btn-show-custom").on 'click', -> $("#popup-custom-rule").toggle()
+  $("div.popup").on 'click', (e) ->
+    $(this).toggle()
+  $("div.popup").children().on 'click', -> false
 
+  $("#btn-save-url").on 'click', ->
+    $("#fld-save-url").val(window.location.href.split('?')[0]+"?"+app.saveToUrlParams())
+    $("#popup-save-url").toggle()
+  $("#fld-save-url").on 'click', ->
+    $(this).select()
+
+  $("#btn-custom-rule-load-sample1").on 'click', ->
+    $("#fld-custom-rule-code").val( CodeSamples.basic )
+    
+  $("#btn-custom-rule-load-sample2").on 'click', ->
+    $("#fld-custom-rule-code").val( CodeSamples.advanced )
+  
   defineToggleButton $("#tb-view-empty"), (show)->app.setShowEmpty show
   defineToggleButton $("#tb-view-center"), (show)->app.setShowCenter show
   defineToggleButton $("#tb-view-connections"), (show)->app.setShowConnection show
+  defineToggleButton $("#tb-view-numbers"), (show)->app.setShowStateNumbers show
+
+
+  $("#tool-draw").on 'click', -> app.controller.setPrimary(app.controller.draw)
+  $("#tool-cue").on 'click', -> app.controller.setPrimary(app.controller.cue)
+  $("#tool-move").on 'click', -> app.controller.setPrimary(app.controller.move)
+  $("#tool-squeeze").on 'click', -> app.controller.setPrimary(app.controller.squeeze)
+  $("#tool-copy").on 'click', -> app.controller.setPrimary(app.controller.copy)
+  $("#tool-paste").on 'click', -> app.controller.setPrimary(app.controller.paste)
+  
+  toolButtons = new ExclusiveButtonGroup ["tool-draw", "tool-cue", "tool-move", "tool-squeeze", "tool-copy", "tool-paste"]
+
             
   kbDispatcher = new SmartDispatcher
   kbDispatcher.getKeymap()
   kbDispatcher.on "n", ->app.step()
   kbDispatcher.on "[", ->app.zoomIn()
   kbDispatcher.on "]", ->app.zoomOut()
-  kbDispatcher.on "c", ->
+  kbDispatcher.on "e", ->
     app.world.clear()
     app.needRepaint = true
   kbDispatcher.on "h", ->app.navigateHome()
   kbDispatcher.on "r", ->app.onRandomFill()
   kbDispatcher.on "z", ->app.onUndo()
+
+
+  kbDispatcher.on 'd', ->$("#tool-draw").trigger 'click'
+  kbDispatcher.on 'm', ->$("#tool-move").trigger 'click'
+  kbDispatcher.on 'u', ->$("#tool-cue").trigger 'click'
+  kbDispatcher.on 'c', ->$("#tool-copy").trigger 'click'
+  kbDispatcher.on 'v', ->$("#tool-paste").trigger 'click'
+  kbDispatcher.on 's', ->$("#tool-squeeze").trigger 'click'
+
+
+  if window.location.search
+    app.loadFromUrlParams new URLSearchParams(window.location.search)
+    try
+      #remove the ugly query string. Not sure if good or bad.
+      history.pushState "", document.title, window.location.pathname
+    catch
+      #ignore
   
   $(window).resize -> app.updateCanvasSize()
     

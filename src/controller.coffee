@@ -9,6 +9,9 @@ class BaseController
   mousedown: (e)->
   mousemove: (e)->
   mouseup: (e)->
+  cancel: ->
+
+  alternative: null
 
   mouse2local: (e)-> @app.view.screen2localInteger @app.canvas, getMousePos @app.canvas, e
   requestRepaint: ->
@@ -26,7 +29,9 @@ class HighlightController extends BaseController
     if not M.equal hlCell, @lastHighlight
       @lastHighlight = hlCell
       @app.view.setHighlightCell hlCell
-      @requestRepaintControls()  
+      @requestRepaintControls()
+  cancel: ->
+    @app.view.setHighlightCell null
   
 class ToggleCellController extends BaseController
   constructor: (app)->
@@ -71,6 +76,11 @@ class ToggleCellController extends BaseController
       @requestRepaintControls()  
         
   mouseup: (e)->
+    @cancel()
+
+  cancel: ->
+    @requestRepaintControls()  
+    @app.view.setHighlightCell null
     @drawing = false
       
 class SelectCellController extends BaseController
@@ -109,10 +119,14 @@ class CopyController extends BaseController
     cells = @app.view.copySelection(@app.canvas)
     @app.view.clearSelectionBox()
     @requestRepaintControls()
-
+    @dragging = false
     #console.log cells
-    @app.controller.paste.selection = cells
-    
+    @app.setSelection cells
+  cancel: (e)->
+    @requestRepaintControls()  
+    @dragging = false
+    @app.view.clearSelectionBox()
+          
 class PasteController extends BaseController
   constructor: (app)->
     super(app)
@@ -129,10 +143,16 @@ class PasteController extends BaseController
       @requestRepaintControls()
       
   mousedown: (e)->
-    pass
-  
-
-class SkewController extends BaseController
+    [xc, yc] = @mouse2local e
+    for [x,y,s] in @selection
+      @app.world.setCell @app.view.local2global([xc+x,yc+y]), s
+    @requestRepaint()
+    
+  cancel: ->
+    @app.view.setPasteLocation null
+    @requestRepaintControls()
+    
+class SqueezeController extends BaseController
   constructor: (app)->
     super(app)
     @dragging = false
@@ -162,7 +182,7 @@ class SkewController extends BaseController
       @orig = pos
       @requestRepaint()
       @requestRepaintControls()
-    
+  cancel: -> @dragging=false
       
 class MoveController extends BaseController
   constructor: (app)->
@@ -189,27 +209,46 @@ class MoveController extends BaseController
     @dragging = false
     @originLocal = null
     @app.updateNavigator()
+  cancel: -> @dragging=false
 
 exports.ControllerHub = class ControllerHub
   constructor: (@app)->
 
     @paste = new PasteController(@app)
-    
-    @primary = new ToggleCellController(@app)
-    @secondary = new SelectCellController(@app)
-    #@secondary = new CopyController(@app)
-    @shiftPrimary = new SkewController(@app)
-    @shiftSecondary = new MoveController(@app)
-    @idle=@paste
+    @draw = new ToggleCellController(@app)
+    @cue = new SelectCellController(@app)
+    @move = new MoveController(@app)
+    @squeeze = new SqueezeController(@app)
+    @copy = new CopyController(@app)
+        
+    @primary = @draw
+    @shiftPrimary = @squeeze
+    @shiftSecondary = @move
+
+    declareAlternativePair = (c1,c2)->
+      c1.alternative = c2
+      c2.alternative = c1
+
+    declareAlternativePair @draw, @cue
+    declareAlternativePair @move, @squeeze
+    declareAlternativePair @paste, @copy
     
     @active = @primary
 
+  setPrimary: (subcontroller)->
+    return if @primary is subcontroller
+
+    @active.cancel()
+    @primary = subcontroller
+    @active = subcontroller
+    
   mousemove: (e)=>
     if @active isnt null
       @active.mousemove e
     else
       @idle.mousemove e
     e.preventDefault()
+    
   mousedown: (e)=>
     if e.button is 0
       if e.shiftKey
@@ -222,7 +261,7 @@ exports.ControllerHub = class ControllerHub
       if e.shiftKey
         @active = @shiftSecondary
       else
-        @active = @secondary
+        @active = @primary.alternative
       
     if @active isnt null
       e.target.setCapture?()

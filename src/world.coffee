@@ -105,4 +105,8 @@ exports.World = class World
 
   population: -> @cells.size()
 
-  
+  getCellList: ->
+    cl = []
+    @cells.iter (kv)->
+      cl.push [kv.k.x, kv.k.y, kv.v]
+    return cl

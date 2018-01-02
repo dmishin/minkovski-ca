@@ -2,6 +2,20 @@ body: {
     padding 0;
 }
 
+h1{
+    font-size: 150%;
+    padding:0;
+    background-color: #eee;
+    border:0;
+    margin:0 0 0.5em 0;
+}
+h2{
+    font-size: 100%;
+    padding:0;
+    background-color: #eee;
+    border:0;
+    margin:0 0 0.5em 0;
+}
 
 .vertical-controls{
     position:absolute;
@@ -10,6 +24,9 @@ body: {
     left:0;
 
     width:14em;
+    height: 100%;
+
+    overflow:auto;
 }
 .vertical-main-screen{
     position:absolute;
@@ -22,6 +39,8 @@ body: {
     border:0;
     overflow:hidden;
 }
+
+
 
 .canvas-stack{
     position:relative
@@ -41,36 +60,60 @@ canvas{
     z-index: 1;
 }
 
-#state-selector{
+.top-toolbar{
     /*put it on top of others*/
     z-index: 2;
     position: absolute;
     top: 0;
-    left: auto;
-    right: auto;
+    margin:0 auto;
+
+}
+span.tool-group{
+    padding:0;
+    padding: 0 0.5em 0 0.5em;
+    border-left:1px solid gray;
+}
+span.tool-group:first-child {
+    border-left: none;
+}
+
+button{
+    font-size:100%;
+    border: 0;
+    padding: 0.2em 0.5em 0.2em 0.5em;
+    border-radius: 3px;
+    background-color: #ddd;
+}
+button:hover{
+    background-color: #ddf;
+}
+
+button.dangerous{
+    background-color: #fdd;
+}
+
+button.highlighted{
+    background-color: #dff;
 }
 
 button.state{
-    border:0;    
+    opacity:0.5;
+    color:white;
+}
+button.selected-state{
+    opacity:1.0;    
 }
 
 button.toggle{
-    opacity:50%;
-    padding:0.5em;
-    margin:0;
-    border:0;
-    border-radius: 3px;
-
     color: #888;
 }
-button.toggle:hover{
-    border: solid blue 1px;
-    margin: -1px;
-}
+
 
 button.pressed{
     color: #000;
+    background-color: #afa;
 }
+
 
 input.short{
     width: 2em;
@@ -80,4 +123,36 @@ input.mid{
 }
 input.long{
     width: 7em;
+}
+
+
+/*popups*/
+div.popup{
+    z-index:3;
+    position: absolute;
+    top:1px;
+    left:1px;
+    bottom:1px;
+    right:1px;
+
+    background-color: rgba(0,0,0,0.3);
+}
+div.popup-box{
+    background-color: white;
+    width: 40em;
+    margin: 0 auto;
+}
+
+
+
+#fld-custom-rule-code{
+    width: 100%;
+    height: 20em;
+}
+
+div.popup-toolbar{
+    text-align:center;
+}
+#fld-save-url{
+    width: 100%;
 }

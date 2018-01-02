@@ -7,7 +7,27 @@
   </head>
   <body>
     <div id="controls" class="vertical-controls">
-      <div id="navigator">
+      <div class="sub-panel">
+	<h2>World</h2>
+	Matrix: <input id="fld-matrix" value="2 1 1 1" class="mid" title="Elements of a 2x2 integer matrix with determinant=1. "/><br/>
+	
+	Neighbors: <input id="fld-sample-neighbor" value="1 0" class="mid" title="List of sample neighbor vectors, must have at least 1 vector. Vectors are separated by semicolon."/><br/>
+	
+	Rule: <input id="fld-rule" value="B3S2 3" class="long"/><button id="btn-show-custom">Custom...</button title="Defin custom rule using JavaScript"><br/>
+      </div>
+      <div class="sub-panel">
+	<h2>View</h2>
+	<button id="tb-view-connections" class="toggle" title="Show neighbor connections">C</button>
+	<button id="tb-view-empty" class="toggle" title="Show empty cells">E</button>
+	<button id="tb-view-center" class="toggle pressed" title="Show view center">X</button>
+	<button id="tb-view-numbers" class="toggle" title="Show state numbers">N</button>
+	<br/>
+	<button id="btn-zoom-in">+</button>
+	<button id="btn-zoom-out">-</button>
+      </div>
+      
+      <div id="navigator" class="sub-panel">
+	<h2>Navigator</h2>
 	<table>
 	  <tr><td>Squeeze:</td><td><span id="navi-squeeze" /></td></tr>
 	  <tr><td>X:</td><td><span id="navi-x" /></td></tr>
@@ -15,49 +35,59 @@
 	  <tr><td>Population:</td><td><span id="info-population" /></td></tr>
 	</table>
       </div>
-      <div id="parameters">
-	Matrix: <input id="fld-matrix" value="2 1 1 1" class="mid"/><br/>
-	Rule: <input id="fld-rule" value="B3S2 3" class="long"/><br/>
-	Sample neighbor: <input id="fld-sample-neighbor" value="1 0" class="mid" title="List of sample neighbor vectors, must have at least 1 vector. Vectors are separated by semicolon."/><br/>
-
+      <div class="sub-panel">
+	<h2>Miscelanneous</h2>
 	<button id="btn-run-animation">Animate</button>
-	<button id="world-clear">Clear (C)</button>
-	<button id="btn-go-home">Home (H)</button>
-	<button id="btn-zoom-in">+ ([)</button>
-	<button id="btn-zoom-out">- (])</button>
-	<button id="btn-step">Step (N)</button>
-
-	<div>
-	  View:<br/>
-	  
-	  <button id="tb-view-connections" class="toggle" title="Show neighbor connections">C</button>
-	  <button id="tb-view-empty" class="toggle" title="Show empty cells">E</button>
-	  <button id="tb-view-center" class="toggle pressed" title="Show view center">X</button>
-	</div>
-	
-	<div>
-	  <input id="fld-random-size" class="short"/><select id="fld-random-percent">
-	    <option value="10">10</option>
-	    <option value="20">20</option>
-	    <option value="30" selected>30</option>
-	    <option value="40">40</option>
-	    <option value="50">50</option>
-	    <option value="60">60</option>
-	    <option value="70">70</option>
-	  </select>
-	  <button id="btn-random-fill">Random fill (R)</button>
-	</div>
-	<div>
-	  <textarea id="fld-custom-rule-code"></textarea>
-	  <button id="btn-set-custom-rule">Set rule</button>
-	</div>
+	<button id="btn-save-url">Save to url...</button>
 	
       </div>
-      
-      <div id="info">Info box</div>
+	
+	<div class="sub-panel">
+	  <h2>Randomize</h2>
+	  Size:<input id="fld-random-size" class="short" value="10"/><select id="fld-random-percent">
+	    <option value="10">10%</option>
+	    <option value="20">20%</option>
+	    <option value="30" selected>30%</option>
+	    <option value="40">40%</option>
+	    <option value="50">50%</option>
+	    <option value="60">60%</option>
+	    <option value="70">70%</option>
+	  </select></br>
+	  <button id="btn-random-fill">Random fill (R)</button>
+	</div>
+	
+	<div class="sub-panel">
+	  <h2>Buffer</h2>
+	  <textarea id="fld-selection"></textarea>
+	  <button id="btn-set-selection">Set selection</button>
+	  <button id="btn-rot180-selection">Rotate 180</button>
+	</div>
+	
     </div>
     <div id="canvas-container" class="vertical-main-screen">
-      <div id="state-selector" ></div>
+      <div class="top-toolbar">
+	<div>
+	  <span class="tool-group">
+	    <button id="btn-step" class="highlighted">Step</button>
+	    <button id="btn-go-home">Home</button>
+	    <button id="world-clear" class="dangerous">Clear</button>
+	  </span>
+	  <span class="tool-group">
+	    <button id="tool-draw" class="toggle pressed">Draw</button>
+	    <button id="tool-cue" class="toggle">Cue</button>
+	  </span>
+	  <span class="tool-group">
+	    <button id="tool-move" class="toggle">Move</button>
+	    <button id="tool-squeeze" class="toggle">Squeeze</button>
+	  </span>
+	  <span class="tool-group">
+	    <button id="tool-copy" class="toggle">Copy</button>
+	    <button id="tool-paste" class="toggle">Paste</button>
+	  </span>
+	</div>      
+	<div id="state-selector" ></div>
+      </div>
+      
       <div class="canvas-stack">
 	<canvas id="canvas" width="40" height="40" >
 	  No canvas support
@@ -66,6 +96,49 @@
 	<canvas id="canvas-controls" width="40" height="40" >
 	</canvas>
       </div>
+    </div>
+
+    <div id="popup-save-url" class="popup" style="display:none">
+      <div class="popup-box">
+	<h1>Copy this url</h1>
+	<input id="fld-save-url"></input>
+      </div>
+    </div>
+    
+    <div id="popup-custom-rule" class="popup" style="display:none">
+      <div class="popup-box">
+	<h1>Custom rule code</h1>
+	<button id="btn-show-custom-rule-help">Help</button>
+	<button id="btn-custom-rule-load-sample1">Basic sample</button>
+	<button id="btn-custom-rule-load-sample2">Complex sample</button>
+	
+	
+	<div id="custom-rule-help" style="display:none">
+	  Custom rule is defined by a JS object having following fields:
+	  <ul>
+	    <li><b>next:</b> required, function(state, sumNeighbors) -> newState. Calculates new state of a cell from its current state and (generalized) sum of the neighbors.
+	    </li>
+	    <li><b>states:</b> optional integer, number of states in the automaton. Default value is 2.
+	    </li>
+
+	    <li><b>foldInitial:</b> optional, any type. Initial values for calculating generalized sum of neighbors. Default value is 0.
+	    </li>
+	    
+	    <li><b>fold:</b> optional, function(sum, state) -> updatedSum. Adds one neighbor to the generalized sum of the neighbors. Default is function(sum,s){return sum+s;}.
+	    </li>
+	  </ul>
+	  
+	</div>
+
+	<textarea id="fld-custom-rule-code"></textarea>
+	<br/>
+	<div class="popup-toolbar">
+	  <button id="btn-set-custom-rule">Set rule</button>
+	    <button id="btn-set-custom-rule-cancel">Cancel</button>
+	  </div>
+      </div>
+    </div>
+    
     </div>
     
     <script src="demo.js"></script>
