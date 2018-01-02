@@ -190,12 +190,24 @@ exports.View = class View
 
     #A, x0, y0, x1, y1, step
     context.beginPath()
-    if @world.isEuclidean
-      k = -1.0/(xy*@scale**2)
-      mtx = [k, 0, 0, k]
-    else
-      k = -1.0/(xy*@scale**2)
-      mtx = [0,k,k,0]
+
+    #calculate equiistant matrix
+    # equation in integer (global) coordinates:
+    # X'AX = c
+    #
+    # Let Y is screen coords, then equation is
+    #
+    # Y = VX     where V is lattice matrix
+    # X = V^-1Y
+    #
+    # Y' V^-1' A V^-1 Y = c
+
+    #original
+    #iV = M.inv @_combinedViewMatrix()
+    #simplified
+    iV = M.smul 1/@scale, @world.latticeMatrix
+     
+    mtx = M.smul 1.0/xy, M.mul M.transpose(iV), M.mul @world.a, iV
     
     for segment in drawAllBranches(mtx, -x0, -y0, w-x0, h-y0, 0.1)
       for [x,y],i in segment
