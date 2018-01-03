@@ -108,10 +108,10 @@ exports.World = class World
     @latticeMatrix = M.mul vv, rot45
 
     #normalize rows of the lattice matrix
-    [v1,v2,u1,u2] = @latticeMatrix
+    [v1,u1,v2,u2] = @latticeMatrix
     [v1,v2] = M.normalized [v1,v2]
     [u1,u2] = M.normalized [u1,u2]
-    @latticeMatrix = [v1,v2,u1,u2]
+    @latticeMatrix = [v1,u1,v2,u2]
     
     #console.log "screen rotation by M before 45 deg rotation is:"
     #console.log muls M.inv(vv), @m, vv
