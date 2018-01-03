@@ -399,11 +399,11 @@ CodeSamples =
   fold: function(sum, s){
     if(s===0) return sum;
     if(sum===null){
-	    sum=new Array(this.states-1);
-	    for(var i=0; i!=sum.length; ++i) sum[i] = 0;
-	  }
-	  sum[s-1] += 1;
-	  return sum
+      sum=new Array(this.states-1);
+      for(var i=0; i!=sum.length; ++i) sum[i] = 0;
+    }
+    sum[s-1] += 1;
+    return sum
   },
   //rule is defined by this table, keys are strings, composed of cell state and sorted neighbor states
   map:{
@@ -425,9 +425,9 @@ CodeSamples =
     var sss=""+s+" ";
     if (sum!=null){
       for(var i=0; i!=sum.length; i++){
-    		var si = sum[i];
+        var si = sum[i];
         for(var j=0;j!=si;j++)
-  		    sss = sss + (i+1);
+          sss = sss + (i+1);
       }
     }
     if (this.map.hasOwnProperty(sss))
