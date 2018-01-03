@@ -7,6 +7,12 @@ M = require "./matrix2.coffee"
 B = require "./bigmatrix.coffee"
 
 hashCombine = (h1,h2) -> (((h1 << 5) - h1) + h2)|0
+muls = (mtxs...) ->
+  m = mtxs[0]
+  for mi in mtxs[1..]
+    m = M.mul m, mi
+  return m
+
 
 
 exports.Coord = class Coord
@@ -49,16 +55,60 @@ exports.World = class World
 
     #parameters of the invariant (pseudo)rotation.
     @isEuclidean = not isReal
-    if isReal
-      @angle = Math.log Math.abs b
-      #console.log "Pseudoangle: #{@angle}"
-    else
-      @angle = Math.atan2 b, a
-      #console.log "Angle: #{@angle}"
+    #if isReal
+    #  @angle = Math.log Math.abs b
+    #  #console.log "Pseudoangle: #{@angle}"
+    #else
+    #  @angle = Math.atan2 b, a
+    #  #console.log "Angle: #{@angle}"
 
     #Normalized projection of the lattice.
-    vv = M.orthoDecomp @a  
+    vv = M.orthoDecomp @a
+    #Now calculate angle (euclidean or pseudo-euclidean, by which multiplication by M rotates
+    # the lattice in the normalized projection
+    #
+    # vv' a vv = diag(+-1)
+    #
+    # let Y is normalized coordinate system (where rotation is straight)
+    #
+    # Y' diag(+-1) Y = Y' vv' a vv Y
+    #
+    # thus X = vv Y  (X is integer coordinate)
+    #
+    # rotation is then: Y1 = vv^-1 X1 = VV^-1 M X = VV^-1 M VV Y
+    #
+    # therefore rotation matrix in Y spae is VV^-1 M VV
+    r = M.mul M.inv(vv), M.mul @m, vv
+    #this matrix is either rotation or pseudo-rotation
+    #console.log "Rotation matrix:"
+    #console.log r
+
+    if @isEuclidean
+      cos = (r[0]+r[3])*0.5
+      sin = (r[1]-r[2])*0.5
+      @angle = Math.atan2 sin, cos
+    else
+      cosh = (r[0]+r[3])*0.5
+      sinh = (r[1]+r[2])*0.5
+      exp =cosh + sinh
+      @angle = Math.log exp
+
+    #ensure the order of vectors in the lattice matrix so that invariant rotation angle would always be positive
+    
+    if @angle < 0
+      @angle = -@angle
+      # rearrange order of columns and rows in r: 
+      # r1 = flip * r * flip  where flip = [0 1 1 0]
+      # thus vv1 = vv * flip
+      flip = if @isEuclidean then [0,1,1,0] else [0,1,-1,0]
+      vv = M.mul vv, flip
+      
     @latticeMatrix = M.mul vv, rot45
+
+    #console.log "screen rotation by M before 45 deg rotation is:"
+    #console.log muls M.inv(vv), @m, vv
+    #console.log "screen rotation by M after 45 deg rotation is:"
+    #console.log muls M.inv(@latticeMatrix), @m, @latticeMatrix
     
   setNeighborVectors: (neighborVectors)->
     @c = (qform(@a, x0) for x0 in neighborVectors)

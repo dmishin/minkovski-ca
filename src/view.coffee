@@ -108,14 +108,18 @@ exports.View = class View
   setHighlightCell: (v)-> @highlightedCell = v
   incrementAngle: (da) ->
     @angle += da
+    #console.log @world.angle
+    direction = 0
     if @angle < -0.51*@world.angle
       @angle += @world.angle
-      @integerRotationsCount -= 1
-      @_premultiplyViewMatrixBy @world.m
+      direction = -1
     else if @angle > 0.51*@world.angle
       @angle -= @world.angle
-      @integerRotationsCount += 1
-      @_premultiplyViewMatrixBy M.adjoint @world.m
+      direction = 1
+      
+    if direction isnt 0
+      @integerRotationsCount += direction
+      @_premultiplyViewMatrixBy if direction is 1 then M.adjoint(@world.m) else @world.m
       
     @setAngle @angle
 
