@@ -102,9 +102,17 @@ exports.World = class World
       # thus vv1 = vv * flip
       flip = if @isEuclidean then [0,1,1,0] else [0,1,-1,0]
       vv = M.mul vv, flip
-      
+
+
+                  
     @latticeMatrix = M.mul vv, rot45
 
+    #normalize rows of the lattice matrix
+    [v1,v2,u1,u2] = @latticeMatrix
+    [v1,v2] = M.normalized [v1,v2]
+    [u1,u2] = M.normalized [u1,u2]
+    @latticeMatrix = [v1,v2,u1,u2]
+    
     #console.log "screen rotation by M before 45 deg rotation is:"
     #console.log muls M.inv(vv), @m, vv
     #console.log "screen rotation by M after 45 deg rotation is:"
@@ -112,17 +120,6 @@ exports.World = class World
     
   setNeighborVectors: (neighborVectors)->
     @c = (qform(@a, x0) for x0 in neighborVectors)
-
-  _sampledata: ->
-    put = (x,y) => @cells.put(new Coord(bigInt(x), bigInt(y)), 1)
-    put 0, 0
-    put 10, 5
-    put -10, 5
-    put 15, 5
-    put -1, -3
-    put 1, 1
-    put 0, 1
-    put -1, 1
 
   setCell: (coord, state) ->
     if state is 0
