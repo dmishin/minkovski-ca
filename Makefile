@@ -18,3 +18,15 @@ animate-rotation.gif: uploads/animate-rotation-????.png
 	echo Cleanup
 	rm uploads/animate-rotation-colormap.gif
 	rm uploads/animate-rotation-????.gif
+
+
+animate-grid.gif: uploads/animate-grid-????.png
+	echo Making a colormap
+	convert +dither -colors 32 -append uploads/animate-grid-0050.png uploads/animate-grid-colormap.gif
+	echo Convert images to colormap
+	mogrify -format gif +dither -map uploads/animate-grid-colormap.gif uploads/animate-grid-????.png
+	echo Collect GIF
+	gifsicle --delay=5 --loopcount=0 -O3 uploads/animate-grid-????.gif > animate-grid.gif
+	echo Cleanup
+	rm uploads/animate-grid-colormap.gif
+	rm uploads/animate-grid-????.gif

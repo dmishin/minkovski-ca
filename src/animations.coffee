@@ -1,4 +1,5 @@
 {drawAllBranches} = require "./ode_curve_drawing.coffee"
+{convexQuadPoints} = require "./geometry.coffee"
 M = require "./matrix2.coffee"
 $ = require "jquery"
 
@@ -134,19 +135,25 @@ animateRotations = ->
         drawPath path, tfm
       return
 
-  runUpload = (step)->
-    if step is nframes
-      console.log "Uploads done"
-      return
+  generateAnimation nframes, "animate-rotation-", (step)->
     angle = Math.sin(step / nframes * 2 * Math.PI)
     drawFrame angle
-    uploadToServer "animate-rotation-#{pad0 4, step}.png", (ajax)->
+
+generateAnimation = (nframes, filePrefix, drawFrame)->
+  runUpload = (step)->
+    if step is nframes
+      console.log "Uploads done for #{filePrefix}"
+      return
+    drawFrame step
+    uploadToServer "#{filePrefix}#{pad0 4, step}.png", (ajax)->
       if ajax.status isnt 200
         console.log "Error"
         console.log ajax
       else
         runUpload step+1
   runUpload(0)
+  
+
     
 getAjax = ->
   if window.XMLHttpRequest?
@@ -164,6 +171,78 @@ uploadToServer = (imgname, callback)->
     ajax.send(formData)
   canvas.toBlob cb, "image/png"
 
+animateLattice = ->
+  nframes = 100
+  canvas.width = 240
+  canvas.height = 120
+
+  scale = 20
+  margin = 10
+  cellSize = 4
+  size = Math.min((canvas.width*0.5) | 0, canvas.height) - margin
+  
+  drawLattice = (color, latticeMtx)->
+    width = size
+    height = size
+
+    #take bigger area, it will be clipped
+    dx = width * 0.7
+    dy = height * 0.7
+
+    #enable clipping
+    ctx.beginPath()
+    ctx.rect -0.5*width, -0.5*height, width, height
+    ctx.clip()
+  
+    #Combined transformation matrix, from integer lattice to screen
+    T = M.smul scale, latticeMtx
+    invT = M.inv T
+
+    #quad in the screen coordinates
+    quad = [ [-dx, dy], [-dx, -dy], [dx, -dy], [dx, dy]]
+    #transform it to the integer lattice
+    iquad  = (M.mulv(invT, vi) for vi in quad)
+    savedContext ctx, ->
+      convexQuadPoints iquad, (ix, iy) ->
+        [sx, sy] = M.mulv T, [ix,iy]
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(sx, sy, cellSize, 0, Math.PI*2, true)
+        ctx.closePath()
+        ctx.fill()
+
+  hexaLattice = [1,0.5,0,Math.sqrt(0.75)]
+
+  drawFrame = (baseColor, mainColor, t)->
+    ctx.fillStyle = "#fff"
+    ctx.fillRect 0, 0, canvas.width, canvas.height
+    
+    angle = Math.PI/3*t
+    tfm = [Math.cos(angle),-Math.sin(angle),Math.sin(angle), Math.cos(angle)]    
+    savedContext ctx, ->
+      ctx.translate canvas.width*0.25|0, canvas.height*0.5|0    
+      drawLattice baseColor, hexaLattice
+      drawLattice mainColor, M.mul tfm, hexaLattice
+
+    #M = [2,1,1,1]
+    #A = [2,-1,-1,-2]
+    # Vs : (2+-sqrt(5), 1)
+    # k: 1/2*(3+sqrt(5))
+    minLattice = M.fromColumns M.normalized([2+Math.sqrt(5),1]), M.normalized([2-Math.sqrt(5),1])
+    pangle = Math.log(0.5*(3+Math.sqrt(5))) * t
+    tfm = [Math.cosh(pangle),Math.sinh(pangle),Math.sinh(pangle), Math.cosh(pangle)]    
+    savedContext ctx, ->
+      ctx.translate canvas.width*0.75|0, canvas.height*0.5|0    
+      drawLattice baseColor, minLattice
+      drawLattice mainColor, M.mul tfm, minLattice
+
+  generateAnimation nframes, "animate-grid-", (step)->
+    t = step / nframes
+    t = 0.5 - 0.5*Math.cos(t * Math.PI)
+    drawFrame "rgba(0,0,255,0.2)", "black", t
   
   
 $("#btn-run-rotations").on 'click', -> animateRotations()
+$("#btn-run-grid").on 'click', -> animateLattice()
+
+
