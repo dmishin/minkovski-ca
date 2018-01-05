@@ -53,14 +53,14 @@
 	    <option value="60">60%</option>
 	    <option value="70">70%</option>
 	  </select></br>
-	  <button id="btn-random-fill">Random fill (R)</button>
+	  <button id="btn-random-fill" title="(R) Initialize with random data">Random fill (R)</button>
 	</div>
 	
 	<div class="sub-panel">
 	  <h2>Buffer</h2>
 	  <textarea id="fld-selection"></textarea>
-	  <button id="btn-set-selection">Set selection</button>
-	  <button id="btn-rot180-selection">Rotate 180</button>
+	  <button id="btn-set-selection" title="Read selection from text field and enable paste mode">Set selection</button>
+	  <button id="btn-rot180-selection" title="Rotate currently copied pattern by 180 degrees">Rotate 180</button>
 	</div>
 	
     </div>
@@ -68,21 +68,21 @@
       <div class="top-toolbar">
 	<div>
 	  <span class="tool-group">
-	    <button id="btn-step" class="highlighted">Step</button>
-	    <button id="btn-go-home">Home</button>
-	    <button id="world-clear" class="dangerous">Clear</button>
+	    <button id="btn-step" class="highlighted" title="(N) Next generation">Step</button>
+	    <button id="btn-go-home" title="(H) Move view center to the origin and reset rotation">Home</button>
+	    <button id="world-clear" class="dangerous" title="(E) Clear the world">Clear</button>
 	  </span>
 	  <span class="tool-group">
-	    <button id="tool-draw" class="toggle pressed">Draw</button>
-	    <button id="tool-cue" class="toggle">Cue</button>
+	    <button id="tool-draw" class="toggle pressed" title="(D) Left button: draw cells, right: put cue mark">Draw</button>
+	    <button id="tool-cue" class="toggle" title="(U) Left button: put cue mark, right: draw cells">Cue</button>
 	  </span>
 	  <span class="tool-group">
-	    <button id="tool-move" class="toggle">Move</button>
-	    <button id="tool-squeeze" class="toggle">Squeeze</button>
+	    <button id="tool-move" class="toggle" title="(M) Drag to move view. Right button: squeeze/rotate view">Move</button>
+	    <button id="tool-squeeze" class="toggle" title="(S) Drag to squeeze/rotate view. Right moue: move view">Squeeze</button>
 	  </span>
 	  <span class="tool-group">
-	    <button id="tool-copy" class="toggle">Copy</button>
-	    <button id="tool-paste" class="toggle">Paste</button>
+	    <button id="tool-copy" class="toggle" title="(C) Select rectangular area and copy to buffer. Right button: paste from buffer">Copy</button>
+	    <button id="tool-paste" class="toggle" title="(P) Paste copied pattern from buffer. Right button: copy rectangle to buffer">Paste</button>
 	  </span>
 	</div>      
 	<div id="state-selector" ></div>
