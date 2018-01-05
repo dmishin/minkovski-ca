@@ -23,7 +23,15 @@ savedContext = (ctx, func)->
 linspace = (a,b,n)->
   s = (b-a)/n
   (a+s*i for i in [0...n])
-  
+
+drawHyperbola = (A, size)->
+  for part in drawAllBranches(A, -0.5*size, -0.5*size, 0.5*size, 0.5*size, 0.1)
+    ctx.beginPath()
+    for [x,y] in part
+      ctx.lineTo x, y
+    ctx.stroke()
+      
+    
 animateRotations = ->
   nframes = 100
   canvas.width = 480
@@ -103,17 +111,10 @@ animateRotations = ->
       ctx.setLineDash [5, 5]
       for radius in radii
         ctx.strokeStyle = "#faa"
-        drawHyperbola M.smul 1.0/(radius**2), A
+        drawHyperbola M.smul( 1.0/(radius**2), A), size
         ctx.strokeStyle = "#aaf"
-        drawHyperbola M.smul -1.0/(radius**2), A
+        drawHyperbola M.smul( -1.0/(radius**2), A), size
         
-  drawHyperbola = (A)->
-    for part in drawAllBranches(A, -0.5*size, -0.5*height, 0.5*size, 0.5*height, 0.1)
-      ctx.beginPath()
-      for [x,y] in part
-        ctx.lineTo x, y
-      ctx.stroke()
-      
   drawFrame = (angle)->
     ctx.fillStyle = "#fff"
     ctx.fillRect 0, 0, canvas.width, canvas.height
@@ -173,12 +174,12 @@ uploadToServer = (imgname, callback)->
 
 animateLattice = ->
   nframes = 100
-  canvas.width = 240
-  canvas.height = 120
+  canvas.width = 320
+  canvas.height = 160
 
-  scale = 20
+  scale = 30
   margin = 10
-  cellSize = 4
+  cellSize = 5
   size = Math.min((canvas.width*0.5) | 0, canvas.height) - margin
   
   drawLattice = (color, latticeMtx)->
@@ -210,9 +211,10 @@ animateLattice = ->
         ctx.arc(sx, sy, cellSize, 0, Math.PI*2, true)
         ctx.closePath()
         ctx.fill()
-
+        
+      
   hexaLattice = [1,0.5,0,Math.sqrt(0.75)]
-
+      
   drawFrame = (baseColor, mainColor, t)->
     ctx.fillStyle = "#fff"
     ctx.fillRect 0, 0, canvas.width, canvas.height
@@ -221,9 +223,14 @@ animateLattice = ->
     tfm = [Math.cos(angle),-Math.sin(angle),Math.sin(angle), Math.cos(angle)]    
     savedContext ctx, ->
       ctx.translate canvas.width*0.25|0, canvas.height*0.5|0    
+      ctx.strokeStyle = "#000"
+      ctx.setLineDash [5,5]
+      
+      drawHyperbola [1/(scale**2),0,0,1/(scale**2)], size
       drawLattice baseColor, hexaLattice
       drawLattice mainColor, M.mul tfm, hexaLattice
 
+      
     #M = [2,1,1,1]
     #A = [2,-1,-1,-2]
     # Vs : (2+-sqrt(5), 1)
@@ -233,8 +240,14 @@ animateLattice = ->
     tfm = [Math.cosh(pangle),Math.sinh(pangle),Math.sinh(pangle), Math.cosh(pangle)]    
     savedContext ctx, ->
       ctx.translate canvas.width*0.75|0, canvas.height*0.5|0    
+      ctx.strokeStyle = "#000"
+      ctx.setLineDash [5,5]
+      drawHyperbola [1/(scale**2),0,0,-1/(scale**2)], size
+      drawHyperbola [-1/(scale**2),0,0,1/(scale**2)], size
+      
       drawLattice baseColor, minLattice
       drawLattice mainColor, M.mul tfm, minLattice
+      
 
   generateAnimation nframes, "animate-grid-", (step)->
     t = step / nframes
