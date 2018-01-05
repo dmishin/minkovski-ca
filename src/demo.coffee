@@ -317,12 +317,6 @@ class StateSelector
     @activeState = s
     console.log "selected state #{s}"
     
-muls = (mtxs...) ->
-  m = mtxs[0]
-  for mi in mtxs[1..]
-    m = M.mul m, mi
-  return m
-
 defineToggleButton = (jqElement, onToggle)->
   jqElement.on 'click', ->
     jqthis = $ this
@@ -503,6 +497,8 @@ $(document).ready ->
       
   $("#btn-set-selection").on 'click', (e)->
     app.setSelection parseCellList($("#fld-selection").val()), false #do not update UI
+    $("#tool-paste").trigger 'click'
+    
   $("#btn-rot180-selection").on 'click', (e)->
     sel = parseCellList($("#fld-selection").val())
     app.setSelection ([-x,-y,s] for [x,y,s] in sel), true #update UI
