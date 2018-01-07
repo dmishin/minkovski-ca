@@ -1,3 +1,5 @@
+all: application.js
+
 application.js: src/*.coffee
 	browserify -t coffeeify src/application.coffee > application.js
 
@@ -30,3 +32,7 @@ animate-grid.gif: uploads/animate-grid-????.png
 	echo Cleanup
 	rm uploads/animate-grid-colormap.gif
 	rm uploads/animate-grid-????.gif
+
+publish: test all
+	git checkout master
+	sh deploy.sh
