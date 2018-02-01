@@ -1,6 +1,6 @@
 Minkovski Cellular Automata Simulator
 =====================================
-
+See it live: https://dmishin.github.io/minkovski-ca/
 
 Theoretical notes
 -----------------
