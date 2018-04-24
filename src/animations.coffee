@@ -174,12 +174,12 @@ uploadToServer = (imgname, callback)->
 
 animateLattice = ->
   nframes = 100
-  canvas.width = 320
-  canvas.height = 160
+  canvas.width = 480
+  canvas.height = 240
 
-  scale = 30
+  scale = 35
   margin = 10
-  cellSize = 5
+  cellSize = 6
   size = Math.min((canvas.width*0.5) | 0, canvas.height) - margin
   
   drawLattice = (color, latticeMtx)->
