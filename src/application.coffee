@@ -367,7 +367,7 @@ class ExclusiveButtonGroup
 class SmartDispatcher extends hotkeys.Dispatcher
   _dispatch: (evt)->
     unless evt.target.tagName.toLowerCase() in ['textarea']
-      super._dispatch(evt)
+      super(evt)
       
 CodeSamples = 
   basic: """//Basic custom rule that re-implements binary rule "B3 S2 3"
