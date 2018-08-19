@@ -167,7 +167,11 @@ describe "diag", ->
   it  "must return diagonal matrix", ->
     assert.ok M.approxEq M.diag(1,2), [1, 0, 0, 2]
     assert.ok M.approxEq M.diag(3,1), [3, 0, 0, 1]
-    
+
+describe "tr", ->
+  it "must return matrix trace", ->
+    assert.ok Math.abs(M.tr([1,2,3,4]) - 5) < 1e-6
+    assert.ok Math.abs(M.tr([4,5,3,1]) - 5) < 1e-6
 
 describe "orthoDecomp", ->
   checkOrthoDecomp = (m) ->

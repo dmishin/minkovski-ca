@@ -52,7 +52,7 @@ class Application
     @rule = new BinaryTotalisticRule "B3S2 3"
     @stateSelector = new StateSelector this
     @prevState = null
-    
+
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
     @world = new World m, [[1,0]]
@@ -114,6 +114,14 @@ class Application
 
     $("#navi-x").text ""+@view.center.x
     $("#navi-y").text ""+@view.center.y
+    
+  setHighlightCell: (cell)->
+    @view.setHighlightCell cell
+    if cell?
+      globalCell = @view.local2global cell
+      $("#status-coord").text "(#{globalCell.x},#{globalCell.y})"
+    return
+    
   updatePopulation: ->
     $("#info-population").text(""+@world.population())    
   zoomIn: -> @zoomBy Math.pow(10, 0.2)
@@ -545,7 +553,7 @@ $(document).ready ->
     app.world.clear()
     app.needRepaint = true
   kbDispatcher.on "h", ->app.navigateHome()
-  kbDispatcher.on "r", ->app.onRandomFill()
+  kbDispatcher.on "a", ->app.onRandomFill()
   kbDispatcher.on "z", ->app.onUndo()
 
 
@@ -554,7 +562,7 @@ $(document).ready ->
   kbDispatcher.on 'u', ->$("#tool-cue").trigger 'click'
   kbDispatcher.on 'c', ->$("#tool-copy").trigger 'click'
   kbDispatcher.on 'v', ->$("#tool-paste").trigger 'click'
-  kbDispatcher.on 's', ->$("#tool-squeeze").trigger 'click'
+  kbDispatcher.on 'r', ->$("#tool-squeeze").trigger 'click'
 
 
   if window.location.search

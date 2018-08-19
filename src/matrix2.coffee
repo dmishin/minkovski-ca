@@ -15,11 +15,18 @@ exports.rot = rot = (angle) ->
   c = Math.cos angle
   return [c, -s, s, c]
 
-exports.hrot = hrot = (sinhD) ->
+exports.hrot_ = hrot_ = (sinhD) ->
   m = eye()
   s = sinhD
   c = Math.sqrt( sinhD*sinhD + 1 )
   return [c,s,s,c]
+
+exports.hrot = hrot = (angle) ->
+  e = Math.exp(angle)
+  ie = 1.0/e
+  s = (e-ie)*0.5
+  c = (e+ie)*0.5
+  [c,s,s,c]
 
 
 exports.mul = mul = (m1, m2) ->
@@ -156,3 +163,5 @@ exports.equal = equal = (u,v) ->
   for ui, i in u
     if ui isnt v[i] then return false
   return true
+
+exports.tr = tr = (m) -> m[0]+m[3]
