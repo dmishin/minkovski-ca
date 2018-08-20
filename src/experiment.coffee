@@ -5,8 +5,10 @@ bigInt = require "big-integer"
 {BinaryTotalisticRule} = require "./rule.coffee"
 
 m = [2,1,1,1]
-sampleNeighbor=[1,0]
+sampleNeighbors=[[1,0]]
 R = new BinaryTotalisticRule("B3 S2 3")
+console.log "Rule is:"
+console.log R
 
 fillRandom = (world, extent, percent)->
 
@@ -21,8 +23,8 @@ fillRandom = (world, extent, percent)->
 maxXY = (world)->
   m = null
   update = (x)->
-    if x.isNegative() : x = x.multiply(-1)
-      
+    if x.isNegative()
+      x = x.multiply(-1) 
     if m is null
       m = x
     else if x.gt m
@@ -31,17 +33,15 @@ maxXY = (world)->
   world.cells.iter (kv)->
     update kv.k.x
     update kv.k.y
-  m
+  return m
   
-w = new World m, sampleNeighbor
+w = new World m, sampleNeighbors
 
 experiments = []
 
-
-for 
-
 initialExtent = 10
 percent = 0.2
+
 
 
 experiment =
@@ -49,15 +49,16 @@ experiment =
   percent: percent
   rule: ""+R
   gridMatrix: m
-  sampleNeighbor: sampleNeighbor
+  sampleNeighbors: sampleNeighbors
 
 fillRandom w, bigInt(initialExtent), percent
+console.log('Initial population:')
 console.log(w.population())
 
 experiment.populdation = pops = []
 generation = 0
     
-
+experiments.push experiment
 while true
   pops.push w.population()
 
@@ -67,5 +68,6 @@ while true
 
   CA.step w, R
   generation += 1
+  
 
-console.log {experiments: experiments
+console.log {experiments: experiments }

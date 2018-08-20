@@ -157,3 +157,43 @@ exports.World = class World
     @cells.iter (kv)->
       cl.push [kv.k.x, kv.k.y, kv.v]
     return cl
+
+
+exports.cellList2Text = (cells)->("#{x} #{y} #{s}" for [x,y,s] in cells).join(";")
+exports.sortCellList = (cells)->
+  cells.sort (vals1, vals2)->
+    for v1, i in vals1
+      v2 = vals2[i]
+      cmp = v1.compare v2
+      return cmp if cmp isnt 0
+    return 0
+  return cells
+
+exports.centerCellList = (cells)->
+  return cells if cells.length is 0
+  for [x,y,_], i in cells
+    if i is 0
+      sx = x
+      sy = y
+    else
+      sx = sx.add x
+      sy = sy.add y
+  cx = sx.divide cells.length
+  cy = sy.divide cells.length
+  #console.log "CEnter #{cx}, #{cy}"
+  for [x,y,s] in cells
+    [x.subtract(cx), y.subtract(cy), s]
+
+exports.parseCellList = (text)-> _parseCellListImpl text, (s)->parseInt(s,10)
+exports.parseCellListBig = (text)-> _parseCellListImpl text, bigInt
+
+_parseCellListImpl = (text, intParser)->
+  console.log text
+  for part in text.split ";" when part
+    m = /(-?\d+)\s+(-?\d+)\s+(\d+)/.exec part.trim()
+    if m is null then throw new Error("Bad format of cell list: #{part}")
+    x = intParser m[1]
+    y = intParser m[2]
+    s = parseInt m[3], 10
+    [x,y,s]
+

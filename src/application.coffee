@@ -4,7 +4,7 @@ M = require "./matrix2.coffee"
 {convexQuadPoints} = require "./geometry.coffee"
 {qform, tfm2qform}  = require "./mathutil.coffee"
 {View} = require "./view.coffee"
-{World, makeCoord}= require "./world.coffee"
+{World, makeCoord, cellList2Text, sortCellList, parseCellList, parseCellListBig}= require "./world.coffee"
 {ControllerHub}= require "./controller.coffee"
 CA = require "./ca.coffee"
 {BinaryTotalisticRule, CustomRule} = require "./rule.coffee"
@@ -254,29 +254,6 @@ class Application
       $("#fld-custom-rule-code").val params.get 'customrule'
     @needRepaint=true
     @needRepaintCtl=true
-
-cellList2Text = (cells)->("#{x} #{y} #{s}" for [x,y,s] in cells).join(";")
-sortCellList = (cells)->
-  cells.sort (vals1, vals2)->
-    for v1, i in vals1
-      v2 = vals2[i]
-      return -1 if v1 < v2 
-      return 1  if v2 > v2
-    return 0
-  return cells
-
-parseCellList = (text)-> _parseCellListImpl text, (s)->parseInt(s,10)
-parseCellListBig = (text)-> _parseCellListImpl text, bigInt
-
-_parseCellListImpl = (text, intParser)->
-  console.log text
-  for part in text.split ";" when part
-    m = /(-?\d+)\s+(-?\d+)\s+(\d+)/.exec part.trim()
-    if m is null then throw new Error("Bad format of cell list: #{part}")
-    x = intParser m[1]
-    y = intParser m[2]
-    s = parseInt m[3], 10
-    [x,y,s]
 
 class StateSelector
   constructor: (@app)->
