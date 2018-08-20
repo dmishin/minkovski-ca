@@ -2,11 +2,12 @@
 CA = require "./ca.coffee"
 {World, makeCoord, cellList2Text, sortCellList, centerCellList} = require "./world.coffee"
 bigInt = require "big-integer"
+B = require "./bigmatrix.coffee"
 {BinaryTotalisticRule} = require "./rule.coffee"
 
-gridMatrix = [10,3,3,1]
-sampleNeighbors=[[1,0],[1,-1],[1, 1],[0, 1]] #1 0;1 -1;1 1; 0 1
-R = new BinaryTotalisticRule("B4 S3 4")
+gridMatrix = [2,1,1,1]
+sampleNeighbors=[[1,0],[2,0]] #1 0;1 -1;1 1; 0 1
+R = new BinaryTotalisticRule("B4 S2 3 4")
 initialExtent = 7
 percent = 0.06
 
@@ -15,10 +16,11 @@ showPercent = false
 MAX_PERIOD = 200
 
 isInteresting = (p, isSpaceship)->
-  return isSpaceship
+  return isSpaceship or (p is -1)
 
 
 console.log "Rule is: #{R}"
+console.log "Lattice matrix: #{JSON.stringify gridMatrix}" 
 console.log "Neighborhood: #{JSON.stringify sampleNeighbors}"
 
 fillRandom = (world, extent, percent)->
@@ -70,6 +72,12 @@ patternsEqual = (pattern1, pattern2)->
       return null unless deltaEq d, delta p2, p1      
   return d
 
+transformCellList = (m, cells)->
+  tfmCell = ([x,y,v])->
+    [x1,y1] = B.mulv m, [x,y]
+    [x1,y1,v]
+  cells.map tfmCell
+
 analyzePeriod = (world, rule)->
   initial = sortCellList world.getCellList()
   period = -1
@@ -82,9 +90,60 @@ analyzePeriod = (world, rule)->
       period = p
       break
 
-  isSpaceship = (translation isnt null) and not (translation[0].isZero() or translation[1].isZero()) 
+  isSpaceship = (translation isnt null) and not (translation[0].isZero() or translation[1].isZero())
+  if isSpaceship
+    {v:translation, rotation: rotation} = normalizeTranslation translation, world
+    initial = transformCellList rotation, initial
   
   console.log "Period:#{period} v=(#{translation[0]},#{translation[1]}) |v|^2=#{world.pnorm2 translation}\t#{cellList2Text centerCellList initial}" if isInteresting(period, isSpaceship)
+
+
+#tries to find a rotataion that minimizes the vector
+normalizeTranslation = (v, world)->
+  m0 = B.tobig world.m
+  m1 = B.adjoint m0
+  
+  criterion = (v)->
+    x = v[1].abs().multiply(10).add(v[0].abs().multiply(2))
+    if v[1].isNegative()
+      #prefer positive to negative
+      x = x.add(1)
+    return x
+
+  v0 = v
+  v1 = B.mulv m0, v0
+  
+  c0 = criterion v0
+  c1 = criterion v1
+
+  if c1.lesser c0
+    #direction m0 is good
+    direction = m0
+    rotation = m0
+  else
+    #direction m1 is good
+    [c0,c1] = [c1,c0]
+    [v0,v1] = [v1,v0]
+    direction = m1
+    rotation = B.eye()
+
+  while true
+    v0 = v1
+    c0 = c1
+    v1 = B.mulv direction, v0
+    c1 = criterion v1
+    break unless c1.lesser c0
+    rotation = B.mul rotation, direction
+
+  [x,y] = v0
+  if (x.isNegative() and not y.isPositive()) or (y.isNegative() and not x.isPositive())
+    flip = [-1,0,0,-1]
+    rotation = B.mul rotation, flip
+    v0 = [x.negate(),y.negate()]
+
+  #at this point, v0, c0 are the best candidates, and rotation stores the rotation
+  return {v: v0, rotation: rotation}
+
 
 percentstep = 1.01
 
