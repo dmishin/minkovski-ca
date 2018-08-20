@@ -152,10 +152,12 @@ exports.View = class View
   setAngle: (v)->
     @angle = v
     @viewMatrix = if @world.isEuclidean
-        M.rot v
+        M.rot -v
       else
-        k = Math.exp v
-        M.diag k, 1.0/k
+        #k = Math.exp v
+        #M.diag k, 1.0/k
+        M.hrot -v
+        
   #translate center in "local" integer coordinates. dv must be a small integer vector
   translateCenterLocal: (dv)->
     dvGlobal = B.mulv B.adjoint(@viewMatrixBig), dv

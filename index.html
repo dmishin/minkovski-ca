@@ -9,7 +9,7 @@
     <div id="controls" class="vertical-controls">
       <div class="sub-panel">
 	<h2>World</h2>
-	Matrix: <input id="fld-matrix" value="2 1 1 1" class="mid" title="Elements of a 2x2 integer matrix with determinant=1. "/><br/>
+	Matrix: <input id="fld-matrix" value="2 1 1 1" class="mid" title="Elements of a 2x2 integer matrix with determinant=1. Trace must be in [-1..1] for rotation, and in [2...infinity) for pseudo-rotation. "/><br/>
 	
 	Neighbors: <input id="fld-sample-neighbor" value="1 0" class="mid" title="List of sample neighbor vectors, must have at least 1 vector. Vectors are separated by semicolon."/><br/>
 	
@@ -29,7 +29,7 @@
       <div id="navigator" class="sub-panel">
 	<h2>Navigator</h2>
 	<table>
-	  <tr><td>Squeeze:</td><td><span id="navi-squeeze" /></td></tr>
+	  <tr><td>Rotation:</td><td><span id="navi-squeeze" /></td></tr>
 	  <tr><td>X:</td><td><span id="navi-x" /></td></tr>
 	  <tr><td>Y:</td><td><span id="navi-y" /></td></tr>
 	  <tr><td>Population:</td><td><span id="info-population" /></td></tr>
@@ -53,7 +53,7 @@
 	    <option value="60">60%</option>
 	    <option value="70">70%</option>
 	  </select></br>
-	  <button id="btn-random-fill" title="(R) Initialize with random data">Random fill (R)</button>
+	  <button id="btn-random-fill" title="(A) Initialize with random data">Random fill (R)</button>
 	</div>
 	
 	<div class="sub-panel">
@@ -77,8 +77,8 @@
 	    <button id="tool-cue" class="toggle" title="(U) Left button: put cue mark, right: draw cells">Cue</button>
 	  </span>
 	  <span class="tool-group">
-	    <button id="tool-move" class="toggle" title="(M) Drag to move view. Right button: squeeze/rotate view">Move</button>
-	    <button id="tool-squeeze" class="toggle" title="(S) Drag to squeeze/rotate view. Right moue: move view">Squeeze</button>
+	    <button id="tool-move" class="toggle" title="(M) Drag to move view. Right button: rotate view">Move</button>
+	    <button id="tool-squeeze" class="toggle" title="(R) Drag to rotate view. Right moue: move view">Rotate</button>
 	  </span>
 	  <span class="tool-group">
 	    <button id="tool-copy" class="toggle" title="(C) Select rectangular area and copy to buffer. Right button: paste from buffer">Copy</button>
@@ -97,7 +97,10 @@
 	</canvas>
       </div>
     </div>
-
+    <div id="status-bar">
+      Coordinates: <span id="status-coord">asd</span>
+    </div>
+    
     <div id="popup-save-url" class="popup" style="display:none">
       <div class="popup-box">
 	<h1>Copy this url</h1>

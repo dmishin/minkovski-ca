@@ -19,20 +19,6 @@ class BaseController
   requestRepaintControls: ->
     @app.needRepaintCtl = true
 
-class HighlightController extends BaseController
-  constructor: (app)->
-    super(app)
-    @lastHighlight = [0,0]
-    
-  mousemove: (e)->
-    hlCell = @mouse2local e
-    if not M.equal hlCell, @lastHighlight
-      @lastHighlight = hlCell
-      @app.view.setHighlightCell hlCell
-      @requestRepaintControls()
-  cancel: ->
-    @app.view.setHighlightCell null
-  
 class ToggleCellController extends BaseController
   constructor: (app)->
     super(app)
@@ -72,7 +58,8 @@ class ToggleCellController extends BaseController
         @app.updatePopulation()
     else
       #highlighting
-      @app.view.setHighlightCell curCell
+      
+      @app.setHighlightCell curCell
       @requestRepaintControls()  
         
   mouseup: (e)->
@@ -245,27 +232,24 @@ exports.ControllerHub = class ControllerHub
   mousemove: (e)=>
     if @active isnt null
       @active.mousemove e
-    else
-      @idle.mousemove e
     e.preventDefault()
     
   mousedown: (e)=>
-    if e.button is 0
+    @active = if e.button is 0
       if e.shiftKey
-        @active = @shiftPrimary
+        @shiftPrimary
       else if e.ctrlKey
-        @active = @shiftSecondary
+        @shiftSecondary
       else
-        @active = @primary
+        @primary
     else if e.button is 2
       if e.shiftKey
-        @active = @shiftSecondary
+        @shiftSecondary
       else
-        @active = @primary.alternative
+        @primary.alternative
       
     if @active isnt null
       e.target.setCapture?()
-      
       @active.mousedown e
       e.preventDefault()
       

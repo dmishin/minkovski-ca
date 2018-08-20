@@ -95,3 +95,4 @@ exports.pow = pow = (m, n) ->
     else
       mp
     
+exports.tr = tr = (m) -> m[0].add m[3]

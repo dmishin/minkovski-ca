@@ -122,3 +122,8 @@ describe "pow", ->
       mi = M.mul m, mi
       
       
+
+describe "tr", ->
+  it "must return matrix trace", ->
+    assert.ok M.tr(M.tobig [1,2,3,4]).equals 5
+    assert.ok M.tr(M.tobig [4,5,1,3]).equals 7
