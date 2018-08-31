@@ -1,4 +1,5 @@
 M = require "./matrix2.coffee"
+{calcStraightLine} = require "./linedrawing.coffee"
 
 getMousePos = (canvas, evt) ->
   rect = canvas.getBoundingClientRect()
@@ -46,16 +47,19 @@ class ToggleCellController extends BaseController
   mousemove: (e)->
     curCell = @mouse2local e
     return if (@prevCell isnt null) and (M.equal curCell, @prevCell)
+    oldPrevCell = @prevCell
     @prevCell = curCell
     
     if @drawing
-      globalCell = @app.view.local2global curCell
-      oldValue = @app.world.getCell globalCell
-      @app.world.setCell globalCell, @writingValue
-      
-      if oldValue isnt @writingValue
-        @requestRepaint()
-        @app.updatePopulation()
+      for curCell1 in (if oldPrevCell? then calcStraightLine(curCell, oldPrevCell) else [curCell])
+        curCell = curCell1
+        globalCell = @app.view.local2global curCell
+        
+        oldValue = @app.world.getCell globalCell
+        @app.world.setCell globalCell, @writingValue
+        if oldValue isnt @writingValue
+          @requestRepaint()
+          @app.updatePopulation()
     else
       #highlighting
       

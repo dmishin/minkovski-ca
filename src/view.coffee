@@ -36,6 +36,7 @@ exports.View = class View
     @angle = 0.0
     @scale = 8
     @cellSize = 4
+    @cellSizeRel = 0.5
     
     @palette = ["#000000", "#fe8f0f", "#f7325e", "#7dc410", "#0264ed"]
     @equidistantColor = "#808080"
@@ -65,8 +66,27 @@ exports.View = class View
     @center = makeCoord 0, 0
     @integerRotationsCount = 0
     @angle = 0.0    
+
+  drawCellShape: (context, x, y, s)->
+    context.beginPath();
+    context.arc(x, y, @cellSize*s, 0, Math.PI*2, true)
+    context.closePath()
+
+
+  drawCellShapeStar: (ctx, x, y, s)->
+    d0 = @cellSize*s
+    d = d0*-0.2
+    d2 = d0*4.0
     
-    
+    ctx.beginPath()
+    ctx.moveTo(x-d2, y-d2)
+    ctx.bezierCurveTo(x-d, y-d, x+d,y-d, x+d2,y-d2)
+    ctx.bezierCurveTo(x+d, y-d, x+d,y+d, x+d2,y+d2)
+    ctx.bezierCurveTo(x+d, y+d, x-d,y+d, x-d2,y+d2)
+    ctx.bezierCurveTo(x-d, y+d, x-d,y-d, x-d2,y-d2)
+    ctx.closePath()
+   
+        
   setSelectionBox: (p1, p2) -> @selectionBox = [p1,p2]
   clearSelectionBox: -> @selectionBox = null
   copySelection: (canvas)->
@@ -251,18 +271,14 @@ exports.View = class View
       [selx, sely] = M.mulv T, @selectedCell
       for ci in @world.c
         @drawEquidistant canvas, context, selx+dx, sely+dy, ci
-      
-      context.beginPath();
-      context.arc(selx+dx, sely+dy, @cellSize*1.5, 0, Math.PI*2, true)
-      context.closePath()
+
+      @drawCellShape context, selx+dx, sely+dy, 1.5
       context.strokeStyle = "green"
       context.stroke()
     if @highlightedCell isnt null
       [hx, hy] = M.mulv T, @highlightedCell
-      
-      context.beginPath();
-      context.arc(hx+dx, hy+dy, @cellSize*1.5, 0, Math.PI*2, true)
-      context.closePath()
+
+      @drawCellShape context, hx+dx, hy+dy, 1.5
       context.strokeStyle = "#0808ff"
       context.stroke()
     if @pasteLocation isnt null and @pasteSelection isnt null
@@ -270,9 +286,7 @@ exports.View = class View
       for [x,y,s] in @pasteSelection
         [sx,sy] = M.mulv T, [x+px, y+py]
 
-        context.beginPath();
-        context.arc(sx+dx, sy+dy, @cellSize, 0, Math.PI*2, true)
-        context.closePath()
+        @drawCellShape context, sx+dx, sy+dy, 1
         context.strokeStyle = @getStateColor s
         context.stroke()
       
@@ -292,7 +306,15 @@ exports.View = class View
     @pasteSelection = selection
 
   getStateColor: (s) -> @palette[(s-1)%@palette.length]
-  
+
+  setScale: (s)->
+    @scale = s
+    @cellSize = @cellSizeRel * s
+
+  setCellSizeRel: (s)->
+    @cellSizeRel = s
+    @cellSize = @cellSizeRel*@scale
+      
   drawGrid: (canvas, context)->
     scale = @scale
     width = canvas.width
@@ -332,9 +354,8 @@ exports.View = class View
       if cellState is 0
         if @showEmpty
           context.strokeStyle =@emptyCellColor
-          context.beginPath()
-          context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
-          context.closePath()
+
+          @drawCellShape context, sx, sy, 1
           context.stroke()        
       else
         
@@ -343,9 +364,7 @@ exports.View = class View
           t = ""+cellState
           context.fillText t, sx, sy
         else
-          context.beginPath();
-          context.arc(sx, sy, @cellSize, 0, Math.PI*2, true)
-          context.closePath()
+          @drawCellShape context, sx, sy, 1
           context.fillStyle = @getStateColor cellState
           context.fill()
         

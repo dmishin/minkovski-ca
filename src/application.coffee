@@ -61,6 +61,7 @@ class Application
     else
       @view.setWorld @world
     @needRepaint = true
+    @needRepaintCtl = true
     
   repaintView: ->
     if @view isnt null
@@ -127,7 +128,7 @@ class Application
   zoomIn: -> @zoomBy Math.pow(10, 0.2)
   zoomOut: -> @zoomBy Math.pow(10, -0.2)
   zoomBy: (k) ->
-    @view.scale = Math.min MAX_SCALE, Math.max MIN_SCALE, @view.scale*k
+    @view.setScale Math.min MAX_SCALE, Math.max MIN_SCALE, @view.scale*k
     @needRepaintCtl = true
     @needRepaint = true
 
@@ -526,6 +527,8 @@ $(document).ready ->
   kbDispatcher.on "n", ->app.step()
   kbDispatcher.on "[", ->app.zoomIn()
   kbDispatcher.on "]", ->app.zoomOut()
+  kbDispatcher.on "+", ->app.zoomIn()
+  kbDispatcher.on "-", ->app.zoomOut()
   kbDispatcher.on "e", ->
     app.world.clear()
     app.needRepaint = true
