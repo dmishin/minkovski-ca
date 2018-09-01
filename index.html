@@ -24,12 +24,15 @@
 	<br/>
 	<button id="btn-zoom-in">+</button>
 	<button id="btn-zoom-out">-</button>
+	<br/>
+	<input id="sld-cell-size" type="range" min="0" max="4"/>
+	
       </div>
       
       <div id="navigator" class="sub-panel">
 	<h2>Navigator</h2>
 	<table>
-	  <tr><td>Rotation:</td><td><span id="navi-squeeze" /></td></tr>
+	  <tr><td>Angle:</td><td><span id="navi-angle" /></td></tr>
 	  <tr><td>X:</td><td><span id="navi-x" /></td></tr>
 	  <tr><td>Y:</td><td><span id="navi-y" /></td></tr>
 	  <tr><td>Population:</td><td><span id="info-population" /></td></tr>
@@ -96,9 +99,9 @@
 	<canvas id="canvas-controls" width="40" height="40" >
 	</canvas>
       </div>
-    </div>
-    <div id="status-bar">
-      Coordinates: <span id="status-coord">asd</span>
+      <div id="status-bar">
+	Coordinates: <span id="status-coord">asd</span>
+      </div>
     </div>
     
     <div id="popup-save-url" class="popup" style="display:none">

@@ -15,6 +15,7 @@ bigInt = require "big-integer"
 MAX_SCALE = 100
 MIN_SCALE = 5
 LOG10 = Math.log 10
+CELL_SIZES = [0.1,0.2, 0.3, 0.4, 0.5]
 
 parseMatrix = (code) ->
   code = code.trim()
@@ -103,15 +104,7 @@ class Application
     @updateNavigator()
 
   updateNavigator: ->
-    if @world.isEuclidean
-      $("#navi-squeeze").text("--")
-    else
-      #its a logarithm of a squeeze
-      log10squeeze = Math.round(@view.getTotalAngle() / LOG10) | 0
-
-      if @lastLog10Squeeze isnt log10squeeze
-        $("#navi-squeeze").html "10<sup>#{log10squeeze}</sup>"
-        @lastLog10Squeeze = log10squeeze
+    $("#navi-angle").text( (@view.getTotalAngle() / Math.PI * 180)|0 )
 
     $("#navi-x").text ""+@view.center.x
     $("#navi-y").text ""+@view.center.y
@@ -232,6 +225,7 @@ class Application
       try
         neighbors = params.get 'neighbors'
         @world.setNeighborVectors parseNeighborSamples neighbors
+        @view.updateWorld()
         $("#fld-sample-neighbor").val(neighbors)
       catch err
         alert "Bad neighbor samepls in url: #{neighbors}, #{err}"
@@ -447,6 +441,7 @@ $(document).ready ->
   $("#fld-sample-neighbor").on 'change', (e)->
     try
       app.world.setNeighborVectors parseNeighborSamples $(this).val()
+      app.view.updateWorld()
       app.needRepaintCtl=true
     catch err
       console.log err
@@ -518,7 +513,12 @@ $(document).ready ->
   $("#tool-squeeze").on 'click', -> app.controller.setPrimary(app.controller.squeeze)
   $("#tool-copy").on 'click', -> app.controller.setPrimary(app.controller.copy)
   $("#tool-paste").on 'click', -> app.controller.setPrimary(app.controller.paste)
-  
+
+  $("#sld-cell-size").on 'input', ->
+    app.view.setCellSizeRel CELL_SIZES[@value]
+    app.needRepaint = true
+    app.needRepaintCtl = true
+    
   toolButtons = new ExclusiveButtonGroup ["tool-draw", "tool-cue", "tool-move", "tool-squeeze", "tool-copy", "tool-paste"]
 
             
@@ -544,6 +544,9 @@ $(document).ready ->
   kbDispatcher.on 'v', ->$("#tool-paste").trigger 'click'
   kbDispatcher.on 'r', ->$("#tool-squeeze").trigger 'click'
 
+  kbDispatcher.on 'ctrl [', ->$("#sld-cell-size").value = $("#sld-cell-size").value+1
+  kbDispatcher.on 'ctrl ]', ->$("#sld-cell-size").value = $("#sld-cell-size").value-1
+
 
   if window.location.search
     app.loadFromUrlParams new URLSearchParams(window.location.search)
@@ -558,6 +561,7 @@ $(document).ready ->
 
   app.controller.attach $("canvas")
 
+  $("#sld-cell-size").trigger 'input'
   app.updateCanvasSize()
   app.updateNavigator()      
   app.startAnimationLoop()

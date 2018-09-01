@@ -58,6 +58,10 @@ exports.View = class View
     @guideColor = "rgba(50,50,200,.5)"
     @showStateNumbers = true
     @stateFont = "15px Arial"
+    @selectedCellColor = "green"
+
+    @displayedNeighbors = [[3,3]]
+    @updateWorld()
 
   setWorld: (w) ->
     @world=w
@@ -65,7 +69,8 @@ exports.View = class View
     @viewMatrixBig = B.eye()
     @center = makeCoord 0, 0
     @integerRotationsCount = 0
-    @angle = 0.0    
+    @angle = 0.0
+    @updateWorld()
 
   drawCellShape: (context, x, y, s)->
     context.beginPath();
@@ -199,16 +204,33 @@ exports.View = class View
   local2global: (xy) ->
     @center.translate B.mulv B.adjoint(@viewMatrixBig), xy
     
+  updateWorld: ->
+    @_calculateDisplayedNeighbors(20)
     
+  #find some neighbors to display with guide
+  _calculateDisplayedNeighbors: (range)->
+    [a,b,_,c] = @world.a
+    neighs = []
+    addxy = (x,yc, c)->
+      return if yc%c isnt 0
+      y = (yc/c) |0
+      return if Math.abs(y) > range
+      neighs.push [x,y]
+      
+    for x in [-range...range] by 1
+      for d in @world.c
+        #y = (sqrt((b^2-a*c)*x^2+c*d)-b*x)/c
+        q = (b*b-a*c)*x*x+c*d
+        continue if q < 0
+        qroot = Math.sqrt(q)|0
+        continue if qroot*qroot isnt q
+        
+        addxy x, (qroot-b*x), c
+        if qroot isnt 0
+          addxy x, (-qroot-b*x), c          
+     @displayedNeighbors = neighs
+        
   drawEquidistant: (canvas, context, x0, y0, xy)->
-
-    #x ranges from 0 to width
-    # y = y0 + xy/(x-x0)
-    #
-    # y=a/x
-    #
-      # dx should be proportional to y''/(1+y'^2)
-      # 
     w = canvas.width
     h = canvas.height
     context.save()
@@ -231,9 +253,9 @@ exports.View = class View
     #original
     #iV = M.inv @_combinedViewMatrix()
     #simplified
-    iV = M.smul 1/@scale, @world.latticeMatrix
+    iV = @world.latticeMatrix
      
-    mtx = M.smul 1.0/xy, M.mul M.transpose(iV), M.mul @world.a, iV
+    mtx = M.smul 1.0/(xy*@scale*@scale), M.mul M.transpose(iV), M.mul @world.a, iV
     
     for segment in drawAllBranches(mtx, -x0, -y0, w-x0, h-y0, 0.1)
       for [x,y],i in segment
@@ -273,8 +295,18 @@ exports.View = class View
         @drawEquidistant canvas, context, selx+dx, sely+dy, ci
 
       @drawCellShape context, selx+dx, sely+dy, 1.5
-      context.strokeStyle = "green"
+      context.strokeStyle = @selectedCellColor
       context.stroke()
+
+      #draw neighbors of the selectedCell
+      for nxy in @displayedNeighbors
+        [ndx,ndy] = M.mulv T, nxy
+        
+        @drawCellShape context, selx+dx+ndx, sely+dy+ndy, 1.5
+        context.strokeStyle = @selectedCellColor
+        context.stroke()
+        
+      
     if @highlightedCell isnt null
       [hx, hy] = M.mulv T, @highlightedCell
 
@@ -301,6 +333,7 @@ exports.View = class View
 
   #map "local" to "screen"
   _combinedViewMatrix: -> M.smul @scale, M.mul @viewMatrix, M.inv(@world.latticeMatrix)
+  
   setPasteLocation: (localCell, selection)->
     @pasteLocation = localCell
     @pasteSelection = selection
@@ -393,5 +426,6 @@ exports.View = class View
                 context.lineTo nx, ny
                 context.stroke()
     context.restore()
-      
+
+            
     
