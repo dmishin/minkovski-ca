@@ -174,7 +174,6 @@ class Application
       throw new Error("Bad percent") if percent < 0 or percent > 100
     
       @world.clear()
-      console.log [size, percent*0.01]
       @randomFill size, percent*0.01
       @updatePopulation()
     catch err
@@ -423,6 +422,9 @@ $(document).ready ->
   $("#fld-matrix").on 'change', (e)->
     try
       app.setLatticeMatrix parseMatrix $("#fld-matrix").val()
+      app.world.setNeighborVectors parseNeighborSamples $("#fld-sample-neighbor").val()
+      app.view.updateWorld()      
+      app.needRepaintCtl=true
       #infobox.text "Lattice matrix set"
     catch err
       console.log ""+err
