@@ -163,7 +163,8 @@ class SqueezeController extends BaseController
   mousemove: (e)->
     if @dragging
       pos = getMousePos(@app.canvas, e)
-
+      @app.view.highlightedCell = null
+      
       #before skewing, translate center to the origin
       #this idea did not work, must do something better
       #app.view.translateCenterLocal @skewCenter
