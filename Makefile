@@ -1,7 +1,7 @@
 all: application.js
 
 application.js: src/*.coffee
-	browserify -t coffeeify src/application.coffee > application.js
+	browserify -t coffeeify src/application.coffee --debug > application.js || rm application.js
 
 test:
 	mocha tests/test*.coffee --compilers coffee:coffee-script/register
