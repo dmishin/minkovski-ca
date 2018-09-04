@@ -71,8 +71,9 @@ canvas{
     z-index: 2;
     position: absolute;
     top: 0;
-    margin:0 auto;
-
+    left: 0;
+    right: 0;
+    text-align:center;
 }
 span.tool-group{
     padding:0;

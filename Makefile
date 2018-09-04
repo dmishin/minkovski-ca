@@ -7,7 +7,7 @@ test:
 	mocha tests/test*.coffee --compilers coffee:coffee-script/register
 
 animations.js: src/*.coffee
-	browserify -t coffeeify src/animations.coffee > animations.js
+	browserify -t coffeeify src/animations.coffee > animations.js || rm animations.js
 
 
 animate-rotation.gif: uploads/animate-rotation-????.png
