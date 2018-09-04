@@ -1,5 +1,7 @@
 "use strict"
 $ = require "jquery"
+require("notifyjs-browser")($)
+
 M = require "./matrix2.coffee"
 {convexQuadPoints} = require "./geometry.coffee"
 {qform, tfm2qform}  = require "./mathutil.coffee"
@@ -54,7 +56,7 @@ class Application
     @prevState = null
 
   setLatticeMatrix: (m) ->
-    console.log "Setting matrix #{JSON.stringify m}"  
+    $.notify "Setting matrix #{JSON.stringify m}"  
     @world = new World m, [[1,0]]
     if @view is null
       @view = new View @world
@@ -181,11 +183,10 @@ class Application
       throw new Error("Bad percent") if percent < 0 or percent > 100
     
       @world.clear()
-      console.log [size, percent*0.01]
       @randomFill size, percent*0.01
       @updatePopulation()
     catch err
-      console.log err
+      $.notify ""+err
     @needRepaint=true
   onUndo: ->
     if @prevState isnt null
@@ -301,7 +302,6 @@ class StateSelector
     @buttons[@activeState-1].removeClass 'selected-state'
     @buttons[s-1].addClass 'selected-state'
     @activeState = s
-    console.log "selected state #{s}"
     
 defineToggleButton = (jqElement, onToggle)->
   jqElement.on 'click', ->
@@ -431,8 +431,7 @@ $(document).ready ->
       app.setLatticeMatrix parseMatrix $("#fld-matrix").val()
       #infobox.text "Lattice matrix set"
     catch err
-      console.log ""+err
-      #infobox.text ""+err
+      $.notify ""+err
     
   $("#fld-matrix").trigger 'change'
 
@@ -441,7 +440,7 @@ $(document).ready ->
       app.setRule( new BinaryTotalisticRule $("#fld-rule").val() )
       #infobox.text "Rule set to #{app.rule}"
     catch err
-      console.log ""+err
+      $.notify ""+err
       #infobox.text "Error setting rule:"+err
       
   $("#fld-sample-neighbor").on 'change', (e)->
@@ -449,7 +448,7 @@ $(document).ready ->
       app.world.setNeighborVectors parseNeighborSamples $(this).val()
       app.needRepaintCtl=true
     catch err
-      console.log err
+      $.notify err
       #infobox.text "Faield to set neighbors vectors:"+err
     
   $("#fld-rule").trigger 'change'
