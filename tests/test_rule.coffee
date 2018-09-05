@@ -4,18 +4,29 @@ assert = require "assert"
 
 describe "BinaryTotalisticRule", ->
   it "Must support creation", ->
-    assert.ok new BinaryTotalisticRule "B2 S2 3"
-    assert.ok new BinaryTotalisticRule "B 2 S 2 3"
-    assert.ok new BinaryTotalisticRule "   B 2 S 2 3  "
-
-    assert.ok new BinaryTotalisticRule "   B   2  S  2 3  "    
+    assert.ok new BinaryTotalisticRule "B2S23"
+    assert.ok new BinaryTotalisticRule "B2S23"
+    assert.ok new BinaryTotalisticRule "   B2S23  "
+    assert.ok new BinaryTotalisticRule "   B2S23"
+    
+  it "Must support empty lists", ->
+    assert.ok new BinaryTotalisticRule "BS"
+    assert.ok new BinaryTotalisticRule "B2S"
+    assert.ok new BinaryTotalisticRule "B2S3"
+    assert.ok new BinaryTotalisticRule "BS3"
 
   it "Must support string conversion", ->
-    r = new BinaryTotalisticRule "B2 S2 3"
-    assert.equal "B2 S2 3", ""+r
+    r = new BinaryTotalisticRule "B2S23"
+    assert.equal "B2S23", ""+r
     
+    r = new BinaryTotalisticRule "BS2"
+    assert.equal "BS2", ""+r
+    r = new BinaryTotalisticRule "B2S"
+    assert.equal "B2S", ""+r
+
+        
   it "Must evaluate correctly", ->
-    r = new BinaryTotalisticRule "B3 S2 3 10"
+    r = new BinaryTotalisticRule "B3S23(10)"
     assert.equal r.next(0,0), 0
     assert.equal r.next(0,1), 0
     assert.equal r.next(0,2), 0
