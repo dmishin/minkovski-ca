@@ -59,6 +59,7 @@ exports.View = class View
     @showStateNumbers = true
     @stateFont = "15px Arial"
     @selectedCellColor = "green"
+    @selectedNeighborsColor = "brown"
 
     @displayedNeighbors = [[3,3]]
     @updateWorld()
@@ -73,7 +74,7 @@ exports.View = class View
     @updateWorld()
 
   drawCellShape: (context, x, y, s)->
-    context.beginPath();
+    context.beginPath()
     context.arc(x, y, @cellSize*s, 0, Math.PI*2, true)
     context.closePath()
 
@@ -83,7 +84,7 @@ exports.View = class View
     d = d0*-0.2
     d2 = d0*4.0
     
-    ctx.beginPath()
+    #ctx.beginPath()
     ctx.moveTo(x-d2, y-d2)
     ctx.bezierCurveTo(x-d, y-d, x+d,y-d, x+d2,y-d2)
     ctx.bezierCurveTo(x+d, y-d, x+d,y+d, x+d2,y+d2)
@@ -282,11 +283,13 @@ exports.View = class View
     context.clearRect(0, 0, canvas.width, canvas.height)
     if @showCenter
       context.strokeStyle = @guideColor
+      sz = Math.min(width, height)*0.1
+      
       context.beginPath()
-      context.moveTo width*0.4, dy
-      context.lineTo width*0.6, dy
-      context.moveTo dx, height*0.4
-      context.lineTo dx, height*0.6
+      context.moveTo dx-sz, dy-sz
+      context.lineTo dx+sz, dy+sz
+      context.moveTo dx-sz, dy+sz
+      context.lineTo dx+sz, dy-sz
       context.stroke()
       
     if @selectedCell isnt null
@@ -299,25 +302,23 @@ exports.View = class View
       context.stroke()
 
       #draw neighbors of the selectedCell
+      context.strokeStyle = @selectedNeighborsColor
       for nxy in @displayedNeighbors
         [ndx,ndy] = M.mulv T, nxy
-        
-        @drawCellShape context, selx+dx+ndx, sely+dy+ndy, 1.5
-        context.strokeStyle = @selectedCellColor
+        @drawCellShape context, selx+dx+ndx, sely+dy+ndy, 1
         context.stroke()
-        
       
     if @highlightedCell isnt null
       [hx, hy] = M.mulv T, @highlightedCell
-
       @drawCellShape context, hx+dx, hy+dy, 1.5
       context.strokeStyle = "#0808ff"
       context.stroke()
+      
     if @pasteLocation isnt null and @pasteSelection isnt null
       [px, py]=@pasteLocation
+      
       for [x,y,s] in @pasteSelection
         [sx,sy] = M.mulv T, [x+px, y+py]
-
         @drawCellShape context, sx+dx, sy+dy, 1
         context.strokeStyle = @getStateColor s
         context.stroke()
@@ -387,7 +388,6 @@ exports.View = class View
       if cellState is 0
         if @showEmpty
           context.strokeStyle =@emptyCellColor
-
           @drawCellShape context, sx, sy, 1
           context.stroke()        
       else
