@@ -3,4 +3,7 @@
 *#
 node_modules
 demo.js
+animations.js
+application.js
+.ipynb_checkpoints
 uploads/*
