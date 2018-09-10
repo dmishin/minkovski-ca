@@ -5,13 +5,14 @@ exports.BinaryTotalisticRule = class BinaryTotalisticRule
   states: 2
   constructor: (rulestr) ->
     @tables = [{}, {}]
-    m = /B([0-9 ]*)S([0-9 ]*)/.exec rulestr.trim()
+    m = /B([0-9\(\)]*)\/?S([0-9\(\)]*)/i.exec rulestr.trim()
     throw new Error("Bad rule string: #{rulestr}") unless m?
 
     parseTable = (tableStr) ->
       table = {}
-      for part in tableStr.split " "
-        continue if part is ""
+      for part in tableStr.match(/\d|\(\d+\)/g) ? []
+        if part[0] is "("
+          part = part.substring(1, part.length-1)
         key = parseInt part, 10
         throw new Error "Bad neighbor sum #{part}" if key isnt key
         table[key] = 1
@@ -29,8 +30,12 @@ exports.BinaryTotalisticRule = class BinaryTotalisticRule
     tablekeys = (table) ->
       keys = (parseInt(key,10) for key, _ of table)
       keys.sort (a,b)->a-b
-      keys
-    "B#{tablekeys(@tables[0]).join ' '} S#{tablekeys(@tables[1]).join ' '}"
+      for k in keys
+        if k<10
+          ""+k
+        else
+          "("+k+")"
+    return "B#{tablekeys(@tables[0]).join ''}S#{tablekeys(@tables[1]).join ''}"
   begin: ->
   end: ->
   

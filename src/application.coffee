@@ -546,8 +546,23 @@ $(document).ready ->
   kbDispatcher.on 'v', ->$("#tool-paste").trigger 'click'
   kbDispatcher.on 'r', ->$("#tool-squeeze").trigger 'click'
 
-  kbDispatcher.on 'ctrl [', ->$("#sld-cell-size").value = $("#sld-cell-size").value+1
-  kbDispatcher.on 'ctrl ]', ->$("#sld-cell-size").value = $("#sld-cell-size").value-1
+  kbDispatcher.on 'shift u', ->
+    app.view.selectedCell = null
+    app.needRepaintCtl = true
+
+  kbDispatcher.on 'ctrl [', ->
+    slider = $("#sld-cell-size").get()
+    console.log slider.value
+    slider.value = slider.value+1
+    console.log slider.value
+    slider.trigger "input"
+    
+  kbDispatcher.on 'ctrl ]', ->
+    slider = $("#sld-cell-size")
+    console.log slider.val().get()
+    slider.val slider.val()-1
+    console.log slider.val()
+    slider.trigger "input"
 
 
   if window.location.search
