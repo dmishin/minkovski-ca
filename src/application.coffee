@@ -35,8 +35,9 @@ parseNeighborSamples = (code) ->
     parts
   if vectors.length is 0
     throw new Error "Zero sample vectors: neighbors not defined"
-
   return vectors
+
+stringifyNeighborSamples = (neighs) -> ["#{x} {y}" for [x,y] in neighs].join ";"
 
 class Application
   constructor: ->
@@ -57,7 +58,6 @@ class Application
     @prevState = null
 
   setLatticeMatrix: (m) ->
-    $.notify "Setting matrix #{JSON.stringify m}"  
     @world = new World m, [[1,0]]
     if @view is null
       @view = new View @world
@@ -424,9 +424,9 @@ $(document).ready ->
     try
       app.setLatticeMatrix parseMatrix $("#fld-matrix").val()
       app.world.setNeighborVectors parseNeighborSamples $("#fld-sample-neighbor").val()
+      $.notify "Lattice matrix set to #{JSON.stringify app.world.m}", "info"
       app.view.updateWorld()      
       app.needRepaintCtl=true
-      #infobox.text "Lattice matrix set"
     catch err
       $.notify ""+err
     
@@ -435,18 +435,18 @@ $(document).ready ->
   $("#fld-rule").on 'change', (e)->
     try
       app.setRule( new BinaryTotalisticRule $("#fld-rule").val() )
-      #infobox.text "Rule set to #{app.rule}"
+      $.notify "Rule set to #{app.rule}", "info"
     catch err
-      $.notify ""+err
-      #infobox.text "Error setting rule:"+err
+      @(this).notify ""+err
       
   $("#fld-sample-neighbor").on 'change', (e)->
     try
       app.world.setNeighborVectors parseNeighborSamples $(this).val()
+      $.notify "Sample neeighbors set to #{$(this).val()}", "info"
       app.view.updateWorld()
       app.needRepaintCtl=true
     catch err
-      $.notify err
+      @(this).notify err
       #infobox.text "Faield to set neighbors vectors:"+err
     
   $("#fld-rule").trigger 'change'
