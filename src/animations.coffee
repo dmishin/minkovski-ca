@@ -1,5 +1,11 @@
 {drawAllBranches} = require "./ode_curve_drawing.coffee"
 {convexQuadPoints} = require "./geometry.coffee"
+
+{CustomRule} = require "./rule.coffee"
+{View} = require "./view.coffee"
+{World, makeCoord, cellList2Text, sortCellList, parseCellList, parseCellListBig}= require "./world.coffee"
+CA = require "./ca.coffee"
+
 M = require "./matrix2.coffee"
 $ = require "jquery"
 
@@ -253,9 +259,127 @@ animateLattice = ->
     t = step / nframes
     t = 0.5 - 0.5*Math.cos(t * Math.PI)
     drawFrame "rgba(0,0,255,0.2)", "black", t
+
+animateRotatingPattern = ->
+  nframes = 10 
+  rotspeed = 0.5
+  nsteps = 4
+  scale = 20
+  margin = 10
+  cellSize = 0.3
   
+  canvas.width = 220
+  canvas.height = 220
+
+  topplerPattern = parseCellList "3 -3 4;-1 -1 4;0 -1 3;-2 0 4;-1 0 2;0 0 1;1 0 2;2 0 4;0 1 3;1 1 4;-3 3 4"
+  rule = new CustomRule """
+{
+    states: 9,
+    foldInitial: null,
+    stats: null,
+
+    begin: function(){
+	this.stats = {}
+    },
+    end: function(){
+    },
+    fold: function(sum, s){
+	if(s===0) return sum;
+	if(sum==null){
+	    sum = new Array(this.states-1);
+	    for(var i=0; i!=sum.length; ++i)
+		sum[i] = 0;
+	}
+	sum[s-1] += 1;
+	return sum
+    },
+    map:{
+	//first step
+	"1 22":1,
+	"2 1344": 5,
+	"3 244": 6,
+	"4 234": 7,
+	"4 234": 7,
+	"0 14": 8,
+	//2nd step
+	"1 5588": 1,
+	"7 5678":  3,
+	
+	"7 567": 0,
+	"8 17": 2,
+	"0 78": 4,
+
+	//remove spurious 4
+	"2 13444": 5,
+	"1 558888": 1,
+	
+    },
+    next: function(s, sum){
+	var sss=""+s+" ";
+	if (sum!=null){
+	    for(var i=0; i!=sum.length; i++){
+		var si = sum[i];
+		for(var j=0;j!=si;j++){
+		    sss = sss + (i+1);
+		}
+	    }
+	}
+	
+	if (this.stats.hasOwnProperty(sss)){
+	    this.stats[sss] += 1;
+	}else{
+	    this.stats[sss] = 1;
+	}
+
+	if (this.map.hasOwnProperty(sss))
+	    return this.map[sss]
+	else
+	    return 0
+	
+    }
+}"""
+
+  
+  M = [2, 1, 1, 1]      
+  world = new World M, [[1,0]]
+  for [x,y,s] in topplerPattern
+    world.setCell makeCoord(x, y), s
+
+  view = new View world
+  #view.drawCellShape = view.drawCellShapeStar
+  view.showStateNumbers = false
+  view.showEmpty = true
+  view.showConnection = false
+  view.setScale scale
+  view.setCellSizeRel cellSize
+  view.emptyCellColor = '#999'
+  
+  size = Math.min((canvas.width*0.5) | 0, canvas.height) - margin
+  
+      
+  #initial location
+  view.incrementAngle -1.0*world.angle
+  
+  lastGeneration = 0
+
+  
+  generateAnimation nframes, "animate-toppler-", (step)->
+    t = step / nframes
+    generation = Math.floor t*nsteps
+    
+    if generation > lastGeneration
+      lastGeneration = generation
+      CA.step world, rule
+  
+    ctx.fillStyle = "#ff0" 
+    ctx.fillRect 0, 0, canvas.width, canvas.height
+    
+    view.drawGrid canvas, ctx, 20
+    view.incrementAngle (world.angle/nframes*nsteps*rotspeed)
+    
   
 $("#btn-run-rotations").on 'click', -> animateRotations()
 $("#btn-run-grid").on 'click', -> animateLattice()
+$("#btn-run-logo").on 'click', -> animateRotatingPattern()
 
 

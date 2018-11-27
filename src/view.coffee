@@ -349,7 +349,7 @@ exports.View = class View
     @cellSizeRel = s
     @cellSize = @cellSizeRel*@scale
       
-  drawGrid: (canvas, context)->
+  drawGrid: (canvas, context, margin=0)->
     scale = @scale
     width = canvas.width
     height = canvas.height
@@ -360,13 +360,16 @@ exports.View = class View
 
     dx = width * 0.5
     dy = height * 0.5
+    dxm = dx + margin
+    dym = dy + margin
+    
 
     #Combined transformation matrix, from integer lattice to screen
     T = @_combinedViewMatrix()
     invT = M.inv T
 
     #quad in the screen coordinates
-    quad = [ [-dx, dy], [-dx, -dy], [dx, -dy], [dx, dy]]
+    quad = [ [-dxm, dym], [-dxm, -dym], [dxm, -dym], [dxm, dym]]
 
     #transform it to the integer lattice
     iquad  = (M.mulv(invT, vi) for vi in quad)

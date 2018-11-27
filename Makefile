@@ -1,7 +1,7 @@
 all: application.js
 
 application.js: src/*.coffee
-	browserify -t coffeeify src/application.coffee > application.js || rm application.js
+	browserify -t coffeeify src/application.coffee --debug > application.js || rm application.js
 
 test:
 	mocha tests/test*.coffee --compilers coffee:coffee-script/register
@@ -20,6 +20,18 @@ animate-rotation.gif: uploads/animate-rotation-????.png
 	echo Cleanup
 	rm uploads/animate-rotation-colormap.gif
 	rm uploads/animate-rotation-????.gif
+
+animate-toppler.gif: uploads/animate-toppler-????.png
+	echo Making a colormap
+	convert +dither -colors 32 -append uploads/animate-toppler-0000.png uploads/animate-toppler-colormap.gif
+	echo Convert images to colormap
+	mogrify -format gif +dither -map uploads/animate-toppler-colormap.gif uploads/animate-toppler-????.png
+	echo Collect GIF
+	gifsicle --delay=5 --loopcount=0 -O3 uploads/animate-toppler-????.gif > animate-rotation.gif
+	echo Cleanup
+	rm uploads/animate-toppler-colormap.gif
+	rm uploads/animate-toppler-????.gif
+
 
 
 animate-grid.gif: uploads/animate-grid-????.png
