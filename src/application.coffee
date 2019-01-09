@@ -198,6 +198,11 @@ class Application
         ""
       else
         cellList2Text(cells)
+        
+  hideCueMarker: ->
+    @view.selectedCell = null
+    @needRepaintCtl = true
+
   saveToUrlParams: ->
     params = new URLSearchParams
     params.set 'matrix', @world.m.join(' ')
@@ -442,7 +447,7 @@ $(document).ready ->
   $("#fld-sample-neighbor").on 'change', (e)->
     try
       app.world.setNeighborVectors parseNeighborSamples $(this).val()
-      $.notify "Sample neeighbors set to #{$(this).val()}", "info"
+      $.notify "Sample neighbors set to #{$(this).val()}", "info"
       app.view.updateWorld()
       app.needRepaintCtl=true
     catch err
@@ -461,6 +466,11 @@ $(document).ready ->
       
   $("#btn-go-home").on "click", (e)->app.navigateHome()
   $("#canvas,#canvas-controls").bind 'contextmenu', false
+  $("#canvas,#canvas-controls").on "wheel", (e)->
+    dy = e.originalEvent.deltaY
+    if dy
+      #console.log [e.originalEvent.deltaY, ['pixel','line','page'][e.originalEvent.deltaMode]]
+      app.zoomBy Math.pow(1.1, if dy > 0 then 1 else -1)
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
@@ -511,6 +521,7 @@ $(document).ready ->
 
   $("#tool-draw").on 'click', -> app.controller.setPrimary(app.controller.draw)
   $("#tool-cue").on 'click', -> app.controller.setPrimary(app.controller.cue)
+  $("#tool-cue-hide").on 'click', -> app.hideCueMarker()
   $("#tool-move").on 'click', -> app.controller.setPrimary(app.controller.move)
   $("#tool-squeeze").on 'click', -> app.controller.setPrimary(app.controller.squeeze)
   $("#tool-copy").on 'click', -> app.controller.setPrimary(app.controller.copy)
@@ -546,9 +557,7 @@ $(document).ready ->
   kbDispatcher.on 'v', ->$("#tool-paste").trigger 'click'
   kbDispatcher.on 'r', ->$("#tool-squeeze").trigger 'click'
 
-  kbDispatcher.on 'shift u', ->
-    app.view.selectedCell = null
-    app.needRepaintCtl = true
+  kbDispatcher.on 'q', -> app.hideCueMarker()
 
   kbDispatcher.on 'ctrl [', ->
     slider = $("#sld-cell-size").get()
