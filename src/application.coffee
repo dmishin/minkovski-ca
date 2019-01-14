@@ -470,7 +470,7 @@ $(document).ready ->
     dy = e.originalEvent.deltaY
     if dy
       #console.log [e.originalEvent.deltaY, ['pixel','line','page'][e.originalEvent.deltaMode]]
-      app.zoomBy Math.pow(1.1, if dy > 0 then 1 else -1)
+      app.zoomBy Math.pow(1.1, if dy > 0 then -1 else 1)
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
