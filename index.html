@@ -9,6 +9,30 @@
     <div id="controls" class="vertical-controls">
       <div class="sub-panel">
 	<h2>World</h2>
+	<select id="fld-load-preset" title="Load one of predefined configurations">
+	  <option value="none" selected disabled>Load preset</option>
+	  <optgroup label="Euclidean">
+	  <option value="{'matrix': '0 -1 1 0', 'neighbors':'1 0;1 1'}">
+	    Square, Moore
+	  </option>
+	  <option value="{'matrix':'1 1 -1 0', 'neighbors':'1 0'}">
+	    Hexagonal
+	  </option>
+	  </optgroup>
+	  <optgroup label="Minkovski">
+	    <option value="{'matrix':'2 1 1 1', 'neighbors':'1 0'}">
+	      Simplest (tr=3)
+	    </option>
+	    <option value="{'matrix':'3 2 1 1', 'neighbors':'1 0'}">
+	      tr=4
+	    </option>
+	    <option value="{'matrix':'5 4 1 1', 'neighbors':'1 0'}">
+	      tr=5
+	    </option>
+	    
+	  </optgroup>
+	  
+	</select>
 	Matrix: <input id="fld-matrix" value="2 1 1 1" class="mid" title="Elements of a 2x2 integer matrix with determinant=1. Trace must be in [-1..1] for rotation, and in [2...infinity) for pseudo-rotation. "/><br/>
 	
 	Neighbors: <input id="fld-sample-neighbor" value="1 0" class="mid" title="List of sample neighbor vectors, must have at least 1 vector. Vectors are separated by semicolon."/><br/>
@@ -40,7 +64,6 @@
       </div>
       <div class="sub-panel">
 	<h2>Miscelanneous</h2>
-	<button id="btn-run-animation">Animate</button>
 	<button id="btn-save-url">Save to url...</button>
 	
       </div>
@@ -56,7 +79,7 @@
 	    <option value="60">60%</option>
 	    <option value="70">70%</option>
 	  </select></br>
-	  <button id="btn-random-fill" title="(A) Initialize with random data">Random fill (R)</button>
+	  <button id="btn-random-fill" title="(A) Initialize with random data">Random fill (A)</button>
 	</div>
 	
 	<div class="sub-panel">

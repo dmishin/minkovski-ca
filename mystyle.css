@@ -132,6 +132,10 @@ input.long{
     width: 7em;
 }
 
+.critical-value{
+    background-color: #fcc;
+}
+
 
 /*popups*/
 div.popup{

@@ -56,6 +56,7 @@ class Application
     @rule = new BinaryTotalisticRule "B3S2 3"
     @stateSelector = new StateSelector this
     @prevState = null
+    @criticalPopulation = 1000
 
   setLatticeMatrix: (m) ->
     @world = new World m, [[1,0]]
@@ -119,7 +120,14 @@ class Application
     return
     
   updatePopulation: ->
-    $("#info-population").text(""+@world.population())    
+    pop = $("#info-population")
+    pop.text(""+@world.population())
+    if @world.population() > @criticalPopulation
+      pop.addClass "critical-value"
+    else
+      pop.removeClass "critical-value"
+      
+    
   zoomIn: -> @zoomBy Math.pow(10, 0.2)
   zoomOut: -> @zoomBy Math.pow(10, -0.2)
   zoomBy: (k) ->
@@ -199,6 +207,19 @@ class Application
       else
         cellList2Text(cells)
         
+  setNeighborVectors: (vectors)->
+    @world.setNeighborVectors vectors
+    @view.updateWorld()
+    @needRepaintCtl=true
+    
+  loadPreset: (preset)->
+    if preset.matrix?
+      @setLatticeMatrix parseMatrix preset.matrix
+      $("#fld-matrix").val preset.matrix
+    if preset.neighbors?
+      @setNeighborVectors parseNeighborSamples preset.neighbors
+      $("#fld-sample-neighbor").val preset.neighbors
+      
   hideCueMarker: ->
     @view.selectedCell = null
     @needRepaintCtl = true
@@ -442,27 +463,34 @@ $(document).ready ->
       app.setRule( new BinaryTotalisticRule $("#fld-rule").val() )
       $.notify "Rule set to #{app.rule}", "info"
     catch err
-      @(this).notify ""+err
+      $(this).notify ""+err
       
   $("#fld-sample-neighbor").on 'change', (e)->
     try
-      app.world.setNeighborVectors parseNeighborSamples $(this).val()
+      console.log "Sanple neighbors changed to "+$(this).val()
+      app.setNeighborVectors parseNeighborSamples $(this).val()
       $.notify "Sample neighbors set to #{$(this).val()}", "info"
-      app.view.updateWorld()
-      app.needRepaintCtl=true
     catch err
-      @(this).notify err
+      $(this).notify err
       #infobox.text "Faield to set neighbors vectors:"+err
     
   $("#fld-rule").trigger 'change'
   $("#fld-sample-neighbor").trigger 'change'
 
-  $("#btn-run-animation").on "click", (e)->
-    if app.animations.length is 0
-      a = new RotateAnimation 0.0002
-      app.startAnimation a
-    else
-      app.stopAnimation app.animations[0]
+  $("#fld-load-preset").on 'change', (e)->
+    try
+      app.loadPreset JSON.parse($("#fld-load-preset").val().replace /\'/g, '"' )
+    catch err
+      $.notify err
+    $("#fld-load-preset").val("none")
+    
+
+#  $("#btn-run-animation").on "click", (e)->
+#    if app.animations.length is 0
+#      a = new RotateAnimation 0.0002
+#      app.startAnimation a
+#    else
+#      app.stopAnimation app.animations[0]
       
   $("#btn-go-home").on "click", (e)->app.navigateHome()
   $("#canvas,#canvas-controls").bind 'contextmenu', false
