@@ -214,11 +214,12 @@ class Application
     
   loadPreset: (preset)->
     if preset.matrix?
-      @setLatticeMatrix parseMatrix preset.matrix
-      $("#fld-matrix").val preset.matrix
+      #@setLatticeMatrix parseMatrix preset.matrix
+      $("#fld-matrix").val(preset.matrix).trigger('change')
+      
     if preset.neighbors?
-      @setNeighborVectors parseNeighborSamples preset.neighbors
-      $("#fld-sample-neighbor").val preset.neighbors
+      #@setNeighborVectors parseNeighborSamples preset.neighbors
+      $("#fld-sample-neighbor").val(preset.neighbors).trigger('change')
       
   hideCueMarker: ->
     @view.selectedCell = null
