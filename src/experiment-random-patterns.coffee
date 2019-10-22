@@ -6,8 +6,8 @@ B = require "./bigmatrix.coffee"
 {BinaryTotalisticRule} = require "./rule.coffee"
 
 gridMatrix = [2,1,1,1]
-sampleNeighbors=[[1,0],[2,0]] #1 0;1 -1;1 1; 0 1
-R = new BinaryTotalisticRule("B4 S2 3 4")
+sampleNeighbors=[[1,0],[2,0]]
+R = new BinaryTotalisticRule("B3 S3 4 5 6 7 8")
 initialExtent = 7
 percent = 0.06
 

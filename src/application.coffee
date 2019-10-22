@@ -247,7 +247,7 @@ class Application
       @randomFill size, percent*0.01
       @updatePopulation()
     catch err
-      $.notify ""+err
+      $.notify err
     @needRepaint=true
     
   onUndo: ->
@@ -517,7 +517,7 @@ $(document).ready ->
       app.view.updateWorld()      
       app.needRepaintCtl=true
     catch err
-      $.notify ""+err
+      $.notify err
     
   $("#fld-matrix").trigger 'change'
 
@@ -526,16 +526,16 @@ $(document).ready ->
       app.setRule( new BinaryTotalisticRule $("#fld-rule").val() )
       $.notify "Rule set to #{app.rule}", "info"
     catch err
-      $(this).notify ""+err
+      $.notify err
       
   $("#fld-sample-neighbor").on 'change', (e)->
     try
-      console.log "Sanple neighbors changed to "+$(this).val()
-      app.setNeighborVectors parseNeighborSamples $(this).val()
-      $.notify "Sample neighbors set to #{$(this).val()}", "info"
+      console.log "Sample neighbors changed to "+$(this).val()
+      neigh = parseNeighborSamples $(this).val()
+      app.setNeighborVectors neigh
+      $.notify "Neighbors: #{JSON.stringify neigh}", "info"
     catch err
-      $(this).notify err
-      #infobox.text "Faield to set neighbors vectors:"+err
+      $.notify err
     
   $("#fld-rule").trigger 'change'
   $("#fld-sample-neighbor").trigger 'change'
@@ -570,7 +570,7 @@ $(document).ready ->
   $("#btn-set-custom-rule").on 'click', (e)->
     try
       app.setRule new CustomRule $("#fld-custom-rule-code").val()
-      #infobox.text("Successfully set custom rule")
+      $.notify "Rule set to custom"
       $("#popup-custom-rule").hide()
     catch e
       alert ""+e
