@@ -1,7 +1,10 @@
-all: application.js
+all: application.js worker.js
 
 application.js: src/*.coffee
 	browserify -t coffeeify src/application.coffee --debug > application.js || rm application.js
+
+worker.js: src/*.coffee
+	browserify -t coffeeify src/worker.coffee --debug > worker.js || rm worker.js
 
 test:
 	mocha tests/test*.coffee --compilers coffee:coffee-script/register

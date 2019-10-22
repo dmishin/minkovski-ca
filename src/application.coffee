@@ -54,6 +54,17 @@ class Application
     @stateSelector = new StateSelector this
     @prevState = null
 
+    if window.Worker
+      @_startWorker()
+    else
+      @worker = null
+    @_workerPending = false
+      
+  _startWorker: ->
+    @worker = new Worker "worker.js"
+    @worker.onmessage = @_renderFinished
+    return
+    
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
     @world = new World m, [[1,0]]
@@ -126,9 +137,58 @@ class Application
     @needRepaint = true
 
   step: ->
+    return if @_workerPending
+    if not @worker or @world.population() < 100
+        @stepLocal()
+    else
+        @stepWorker()
+    return
+    
+  stepLocal: ->
     @prevState = CA.step @world, @rule
     @updatePopulation()
     @needRepaint = true
+
+    
+  stepWorker: ->
+    rtype = switch
+      when @rule instanceof BinaryTotalisticRule
+        "BinaryTotalisticRule"
+      when @rule instanceof CustomRule
+        "CustomRule"
+      else throw new Error("Hmm, bad rule type")
+    cells = []
+    @world.cells.iter (kv)->
+      cells.push [""+kv.k.x, ""+kv.k.y, kv.v]
+    @worker.postMessage ['render', [rtype, @rule.toString(), @world.m, @world.c, cells]]
+    @_workerPending = true
+    $("#worker-spinner").show()
+    return
+    
+  _renderFinished: (e)=>
+    @_workerPending = false
+    [msg, data] = e.data
+    if msg is 'error'
+        console.log("Error: "+data)
+    else if msg is 'OK'
+        #applying results
+        @prevState = @world.cells
+        @world.clear()
+        for [x,y,s] in data
+          @world.setCell makeCoord(x,y),s
+        @updatePopulation()
+        @needRepaint = true
+    else
+        console.log("Bad answer:"+msg)
+    $("#worker-spinner").hide()
+    return
+  cancelStep: ->
+    return if not @_workerPending
+    @worker.terminate()
+    @_startWorker()
+    $("#worker-spinner").hide()
+    @_workerPending = false
+    
     
   updateCanvasSize: ->
     cont = $ "#canvas-container"
@@ -179,11 +239,13 @@ class Application
     catch err
       console.log err
     @needRepaint=true
+    
   onUndo: ->
     if @prevState isnt null
       @world.cells = @prevState
       @prevState = null
       @needRepaint=true
+      @updatePopulation()
       
   setRule: (rule) ->
     @rule = rule
@@ -464,6 +526,7 @@ $(document).ready ->
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
+  $("#cancel-step").on "click", -> app.cancelStep()
   $("#btn-random-fill").on "click", -> app.onRandomFill()
   $("#btn-set-custom-rule").on 'click', (e)->
     try
