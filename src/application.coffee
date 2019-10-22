@@ -55,12 +55,15 @@ class Application
     @prevState = null
 
     if window.Worker
-      @worker = new Worker "worker.js"
-      @worker.onmessage = @_renderFinished
+      @_startWorker()
     else
       @worker = null
     @_workerPending = false
       
+  _startWorker: ->
+    @worker = new Worker "worker.js"
+    @worker.onmessage = @_renderFinished
+    return
     
   setLatticeMatrix: (m) ->
     console.log "Setting matrix #{JSON.stringify m}"  
@@ -179,7 +182,14 @@ class Application
         console.log("Bad answer:"+msg)
     $("#worker-spinner").hide()
     return
-	
+  cancelStep: ->
+    return if not @_workerPending
+    @worker.terminate()
+    @_startWorker()
+    $("#worker-spinner").hide()
+    @_workerPending = false
+    
+    
   updateCanvasSize: ->
     cont = $ "#canvas-container"
     @canvasCtl.width = @canvas.width = cont.innerWidth() | 0
@@ -516,6 +526,7 @@ $(document).ready ->
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
+  $("#cancel-step").on "click", -> app.cancelStep()
   $("#btn-random-fill").on "click", -> app.onRandomFill()
   $("#btn-set-custom-rule").on 'click', (e)->
     try
