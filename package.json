@@ -6,7 +6,7 @@
   "dependencies": {
     "big-integer": "^1.6.26",
     "hotkeys": "^1.0.0",
-    "jquery": "^3.2.1",
+    "jquery": "^3.4.0",
     "url-search-params": "^0.10.0"
   },
   "devDependencies": {
