@@ -88,6 +88,9 @@ exports.World = class World
                   
     @latticeMatrix = vv
     
+
+  setNeighborDistances: (neighborDistances) ->
+    @c = neighborDistances
     
   setNeighborVectors: (neighborVectors)->
     @c = (qform(@a, x0) for x0 in neighborVectors)
