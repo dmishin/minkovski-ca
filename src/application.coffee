@@ -19,6 +19,8 @@ MIN_SCALE = 5
 LOG10 = Math.log 10
 CELL_SIZES = [0.1,0.2, 0.3, 0.4, 0.5]
 
+{debounce} = require "throttle-debounce"
+
 parseMatrix = (code) ->
   code = code.trim()
   parts = code.split /\s+/
@@ -62,8 +64,8 @@ class Application
       @_startWorker()
     else
       @worker = null
-    @_workerPending = false
-      
+    @_workerPending = false    
+    
   _startWorker: ->
     @worker = new Worker "worker.js"
     @worker.onmessage = @_renderFinished
@@ -269,6 +271,17 @@ class Application
       else
         cellList2Text(cells)
         
+  selectionBufferChanged: (event, curText) ->
+    try
+      curText = $("#fld-selection").val().trim()
+      cells = if curText then parseCellList(curText) else null
+      @setSelection cells, false #do not update UI
+      $("#tool-paste").trigger 'click' if curText
+    catch e
+      $.notify e
+      
+      
+    
   setNeighborVectors: (vectors)->
     @world.setNeighborVectors vectors
     @view.updateWorld()
@@ -579,10 +592,12 @@ $(document).ready ->
   if $("#fld-custom-rule-code").val()
     $("#btn-set-custom-rule").trigger 'click'
   $("#btn-show-custom-rule-help").on 'click', -> $('#custom-rule-help').toggle()
-      
-  $("#btn-set-selection").on 'click', (e)->
-    app.setSelection parseCellList($("#fld-selection").val()), false #do not update UI
-    $("#tool-paste").trigger 'click'
+    
+  $("#fld-selection").on 'change', (e)->
+    app.selectionBufferChanged()
+    
+  $("#fld-selection").on 'input', debounce 500, false, (e)->
+    app.selectionBufferChanged()
     
   $("#btn-rot180-selection").on 'click', (e)->
     sel = parseCellList($("#fld-selection").val())
