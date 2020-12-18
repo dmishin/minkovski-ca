@@ -524,7 +524,7 @@ $(document).ready ->
   $("#fld-rule").on 'change', (e)->
     try
       app.setRule( new BinaryTotalisticRule $("#fld-rule").val() )
-      $.notify "Rule set to #{app.rule}", "info"
+      $.notify "Rule is set to #{app.rule}", "info"
     catch err
       $.notify err
       

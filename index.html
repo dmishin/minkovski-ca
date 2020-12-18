@@ -34,43 +34,48 @@
 	  
 	</select>
 	<br/>
-	Matrix: <input id="fld-matrix" value="2 1 1 1" class="mid" title="Elements of a 2x2 integer matrix with determinant=1. Trace must be in [-1..1] for rotation, and in [2...infinity) for pseudo-rotation. "/><br/>
-	
-	Neighbors: <input id="fld-sample-neighbor" value="1 0" class="mid" title="List of sample neighbor vectors, must have at least 1 vector. Vectors are separated by semicolon."/><br/>
-	
-	Rule: <input id="fld-rule" value="B3S23" class="long"/><button id="btn-show-custom">Custom...</button title="Defin custom rule using JavaScript"><br/>
+	<table>
+	  <tbody>
+	  <tr>
+	    <td>Lattice matrix</td><td><input id="fld-matrix" value="2 1 1 1" class="mid" title="Elements of a 2x2 integer matrix with determinant=1. Trace must be in [-1..1] for rotation, and in [2...infinity) for pseudo-rotation. "/></td>
+	  </tr>
+	  
+	<tr>
+	  <td>Neighbors</td>
+	  <td><input id="fld-sample-neighbor" value="1 0" class="mid" title="List of sample neighbor vectors, must have at least 1 vector. Vectors are separated by semicolon."/></td>
+	</tr>
+	<tr>
+	  <td>Rule</td>
+	  <td><input id="fld-rule" value="B3S23" class="long"/></td>
+	</tr>
+	</tbody>
+	</table>
+	<button id="btn-show-custom"  title="Define custom rule using JavaScript">Custom...</button>
       </div>
       <div class="sub-panel">
 	<h2>View</h2>
+	Zoom <button id="btn-zoom-in">In</button>/<button id="btn-zoom-out">Out</button>
+	<br/>
+	<input id="sld-cell-size" type="range" min="0" max="4"/>
+	<br/>
 	<button id="tb-view-connections" class="toggle" title="Show neighbor connections">C</button>
 	<button id="tb-view-empty" class="toggle" title="Show empty cells">E</button>
 	<button id="tb-view-center" class="toggle pressed" title="Show view center">X</button>
 	<button id="tb-view-numbers" class="toggle" title="Show state numbers">N</button>
-	<br/>
-	<button id="btn-zoom-in">+</button>
-	<button id="btn-zoom-out">-</button>
-	<br/>
-	<input id="sld-cell-size" type="range" min="0" max="4"/>
 	
       </div>
       
       <div id="navigator" class="sub-panel">
 	<h2>Navigator</h2>
 	<table>
-	  <tr><td>Angle:</td><td><span id="navi-angle" /></td></tr>
-	  <tr><td>X:</td><td><span id="navi-x" /></td></tr>
-	  <tr><td>Y:</td><td><span id="navi-y" /></td></tr>
-	  <tr><td>Population:</td><td><span id="info-population" /></td></tr>
+	  <tr><td>Center:</td><td>(<span id="navi-x"></span>,<span id="navi-y"></span>)</td></tr>
+	  <tr><td>Angle:</td><td><span id="navi-angle"></span></td></tr>
+	  <tr><td>Population:</td><td><span id="info-population"></span></td></tr>
 	</table>
       </div>
-      <div class="sub-panel">
-	<h2>Miscelanneous</h2>
-	<button id="btn-save-url">Save to url...</button>
-	
-      </div>
-	
 	<div class="sub-panel">
 	  <h2>Randomize</h2>
+	  <button id="btn-random-fill" title="(A) Initialize with random data">Random fill (A)</button>
 	  Size:<input id="fld-random-size" class="short" value="10"/><select id="fld-random-percent">
 	    <option value="10">10%</option>
 	    <option value="20">20%</option>
@@ -80,7 +85,6 @@
 	    <option value="60">60%</option>
 	    <option value="70">70%</option>
 	  </select></br>
-	  <button id="btn-random-fill" title="(A) Initialize with random data">Random fill (A)</button>
 	</div>
 	
 	<div class="sub-panel">
@@ -89,6 +93,12 @@
 	  <button id="btn-set-selection" title="Read selection from text field and enable paste mode">Set selection</button>
 	  <button id="btn-rot180-selection" title="Rotate currently copied pattern by 180 degrees">Rotate 180</button>
 	</div>
+      <div class="sub-panel">
+	<h2>Miscelanneous</h2>
+	<button id="btn-save-url">Save to url...</button>
+	
+      </div>
+	
 	
     </div>
     <div id="canvas-container" class="vertical-main-screen">

@@ -34,8 +34,8 @@ exports.View = class View
     @center = makeCoord 0, 0
     @integerRotationsCount = 0
     @angle = 0.0
-    @scale = 8
-    @cellSize = 4
+    @scale = 20
+    @cellSize = 8
     @cellSizeRel = 0.5
     
     @palette = ["#000000", "#fe8f0f", "#f7325e", "#7dc410", "#0264ed"]
