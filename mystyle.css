@@ -91,6 +91,19 @@ button{
     border-radius: 3px;
     background-color: #ddd;
 }
+
+button.left{
+    border-radius: 50% 0 0 50%;
+    background-color: #ddd;
+    margin-right:0;
+}
+
+button.right{
+    border-radius: 0 50% 50% 0;
+    background-color: #ddd;
+    margin-left:0;
+}
+
 button:hover{
     background-color: #ddf;
 }
