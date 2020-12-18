@@ -51,3 +51,6 @@ animate-grid.gif: uploads/animate-grid-????.png
 publish: test all
 	git checkout master
 	sh deploy.sh
+
+serve: all
+	python -m http.server --bind 127.0.0.1 8000 
