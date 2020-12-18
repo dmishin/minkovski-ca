@@ -65,6 +65,7 @@ class Application
     else
       @worker = null
     @_workerPending = false    
+    @playing = false
     
   _startWorker: ->
     @worker = new Worker "worker.js"
@@ -148,6 +149,18 @@ class Application
     @needRepaintCtl = true
     @needRepaint = true
 
+  go: ->
+    if @playing
+      @playing = false
+      $("#btn-go").removeClass 'pressed'
+      console.log "Stop playing"
+    else
+      @playing = true
+      $("#btn-go").addClass 'pressed'
+      console.log "Start playing"
+      @step()
+    return
+    
   step: ->
     return if @_workerPending
     if not @worker or @world.population() < 100
@@ -155,12 +168,16 @@ class Application
     else
         @stepWorker()
     return
-    
+
+  _scheduleStep: ->
+    setTimeout((()=>@step()), 500)
+            
   stepLocal: ->
     @prevState = CA.step @world, @rule
     @updatePopulation()
     @needRepaint = true
-
+    @_scheduleStep() if @playing
+    return
     
   stepWorker: ->
     rtype = switch
@@ -193,13 +210,17 @@ class Application
     else
         console.log("Bad answer:"+msg)
     $("#worker-spinner").hide()
+    @_scheduleStep() if @playing
     return
+    
   cancelStep: ->
     return if not @_workerPending
     @worker.terminate()
     @_startWorker()
     $("#worker-spinner").hide()
     @_workerPending = false
+    @go() if @playing
+    return
     
     
   updateCanvasSize: ->
@@ -208,22 +229,27 @@ class Application
     @canvasCtl.height = @canvas.height = cont.innerHeight() | 0
     @needRepaint = true
     @needRepaintCtl = true
-
+    return
+    
   setShowStateNumbers: (show)->
     @view.showStateNumbers = show
     @needRepaint=true
+    return
     
   setShowConnection: (show)->
     @view.showConnection = show
     @needRepaint = true
+    return
     
   setShowEmpty: (show) ->
     @view.showEmpty = show
     @needRepaint = true
+    return
     
   setShowCenter: (show)->
     @view.showCenter = show
     @needRepaintCtl = true
+    return
     
   randomFill: (size, percent)->
     x0 = -((size/2)|0)
@@ -578,6 +604,7 @@ $(document).ready ->
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
+  $("#btn-go").on "click", -> app.go()
   $("#cancel-step").on "click", -> app.cancelStep()
   $("#btn-random-fill").on "click", -> app.onRandomFill()
   $("#btn-set-custom-rule").on 'click', (e)->
@@ -657,6 +684,7 @@ $(document).ready ->
   kbDispatcher.on "z", ->app.onUndo()
 
 
+  kbDispatcher.on 'g', ->$("#btn-go").trigger 'click'
   kbDispatcher.on 'd', ->$("#tool-draw").trigger 'click'
   kbDispatcher.on 'm', ->$("#tool-move").trigger 'click'
   kbDispatcher.on 'u', ->$("#tool-cue").trigger 'click'
