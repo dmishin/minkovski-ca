@@ -127,10 +127,12 @@ class Application
     $("#navi-y").text ""+@view.center.y
     
   setHighlightCell: (cell)->
-    @view.setHighlightCell cell
-    if cell?
-      globalCell = @view.local2global cell
-      $("#status-coord").text "(#{globalCell.x},#{globalCell.y})"
+    @view.setHighlightCell cell    
+    @showCellCoordinates @view.local2global cell if cell?
+    return
+    
+  showCellCoordinates: (globalCell)->
+    $("#status-coord").text "(#{globalCell.x},#{globalCell.y})" if globalCell?
     return
     
   updatePopulation: ->

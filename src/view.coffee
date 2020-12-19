@@ -73,6 +73,21 @@ exports.View = class View
     @angle = 0.0
     @updateWorld()
 
+  getSelectedCellGlobal: ->
+    if @selectedCell
+      @local2global @selectedCell
+    else
+      null
+    
+  toggleSelectedCell: (localCell)->
+    @selectedCell = 
+      if @selectedCell is null or not M.equal(@selectedCell, localCell)
+        localCell
+      else
+        null
+    return
+    
+
   drawCellShape: (context, x, y, s)->
     context.beginPath()
     context.arc(x, y, @cellSize*s, 0, Math.PI*2, true)

@@ -77,11 +77,8 @@ class ToggleCellController extends BaseController
 class SelectCellController extends BaseController
   mousedown: (e)->
     localCell = @mouse2local e
-    @app.view.selectedCell =
-      if @app.view.selectedCell is null or not M.equal(@app.view.selectedCell, localCell)
-        localCell
-      else
-        null
+    @app.view.toggleSelectedCell localCell    
+    @app.showCellCoordinates @app.view.getSelectedCellGlobal()
     @requestRepaintControls()
 
 class CopyController extends BaseController

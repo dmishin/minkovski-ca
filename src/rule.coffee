@@ -35,7 +35,7 @@ exports.BinaryTotalisticRule = class BinaryTotalisticRule
           ""+k
         else
           "("+k+")"
-    return "B#{tablekeys(@tables[0]).join ''}S#{tablekeys(@tables[1]).join ''}"
+    return "B#{tablekeys(@tables[0]).join ''}/S#{tablekeys(@tables[1]).join ''}"
   begin: ->
   end: ->
   
