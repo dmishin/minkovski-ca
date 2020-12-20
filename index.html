@@ -9,6 +9,8 @@
   <body>
     <div id="controls" class="vertical-controls">
       <div class="sub-panel">
+	<a class="help-button" href="help.html" target="_blank">Help</a>
+	<button id="btn-help-shortcuts"  title="Show information on keyboard shortcuts">Shortcuts</button>
 	<h2>World</h2>
 	<select id="fld-load-preset" title="Load one of predefined configurations">
 	  <option value="none" selected disabled>Load preset</option>
@@ -123,9 +125,6 @@
 	  <span class="tool-group">
 	    <button id="tool-copy" class="toggle left" title="(C) Select rectangular area and copy to buffer. Right button: paste from buffer">Copy</button><button id="tool-paste" class="toggle right" title="(P) Paste copied pattern from buffer. Right button: copy rectangle to buffer">Paste</button>
 	  </span>
-	  <span class="tool-group">
-	    <a class="help-button" href="help.html" target="_blank">Help</a>
-	  </span>
 	</div>      
 	<div id="state-selector" ></div>
 	<div id="worker-spinner" style="display:none"><img src="spinner.gif" alt="calculating..."/><button id="cancel-step">Cancel</button></div>
@@ -186,8 +185,33 @@
       </div>
     </div>
     
+    <div id="popup-help-shortcuts" class="popup" style="display:none">
+      <div class="popup-box">
+	<h1>Keyboard shortcuts</h1>
+	<table>
+	  <tbody>
+	    <tr><td colspan="2" class="subheader">Editing</td></tr>
+	    <tr><td><kbd>N</kbd></td><td>Next step</td></tr>
+	    <tr><td><kbd>Z</kbd></td><td>Undo last step</td></tr>
+	    <tr><td><kbd>G</kbd></td><td>Run/stop simulation</td></tr>
+	    <tr><td><kbd>A</kbd></td><td>Random fill</td></tr>
+	    <tr><td><kbd>E</kbd></td><td>Clear the world</td></tr>
+	    <tr><td colspan="2" class="subheader">Mouse tools</td></tr>
+	    <tr><td><kbd>D</kbd></td><td>Enable drawing mode</td></tr>
+	    <tr><td><kbd>U</kbd></td><td>Enable cue mark mode</td></tr>
+	    <tr><td><kbd>M</kbd></td><td>Enable panning mode</td></tr>
+	    <tr><td><kbd>R</kbd></td><td>Enable rotation mode</td></tr>
+	    <tr><td><kbd>C</kbd></td><td>Enable select and copy mode</td></tr>
+	    <tr><td><kbd>P</kbd></td><td>Enable paste mode</td></tr>
+	    <tr><td colspan="2" class="subheader">Viewing and navigation</td></tr>
+	    <tr><td><kbd>Q</kbd></td><td>Hide cue mark is shown</td></tr>
+	    <tr><td><kbd>H</kbd></td><td>Havigate to origin</td></tr>
+	    <tr><td><kbd>[</kbd></td><td>Zoom in</td></tr>
+	    <tr><td><kbd>]</kbd></td><td>Zoom out</td></tr>
+	  </tbody>
+	</table>
+      </div>
     </div>
-    
     <script src="application.js"></script>
   </body>
 </html>

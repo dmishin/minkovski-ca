@@ -603,6 +603,10 @@ $(document).ready ->
     if dy
       #console.log [e.originalEvent.deltaY, ['pixel','line','page'][e.originalEvent.deltaMode]]
       app.zoomBy Math.pow(1.1, if dy > 0 then -1 else 1)
+  $("#btn-help-shortcuts").on "click", ->
+    console.log("toggle help")
+    $("#popup-help-shortcuts").toggle()
+    
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
   $("#btn-step").on "click", ->app.step()
@@ -673,6 +677,8 @@ $(document).ready ->
             
   kbDispatcher = new SmartDispatcher
   kbDispatcher.getKeymap()
+  kbDispatcher.on "esc", ->$("div.popup").hide()
+  
   kbDispatcher.on "n", ->app.step()
   kbDispatcher.on "[", ->app.zoomIn()
   kbDispatcher.on "]", ->app.zoomOut()
