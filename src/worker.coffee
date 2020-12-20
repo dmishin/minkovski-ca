@@ -17,7 +17,7 @@ onmessage = (e)->
   catch e
     ['error', ""+e]
     	      
-renderDataImpl = (ruleType, ruleCode, skewMatrix, neighbors, cells)->
+renderDataImpl = (ruleType, ruleCode, skewMatrix, neighbors, cells, needConnections)->
   #first convert everything to the native objects
   rule = switch
     when ruleType is "BinaryTotalisticRule" then new BinaryTotalisticRule ruleCode
@@ -35,8 +35,20 @@ renderDataImpl = (ruleType, ruleCode, skewMatrix, neighbors, cells)->
   cells = []
   world.cells.iter (kv)->
       cells.push [""+kv.k.x, ""+kv.k.y, kv.v]
-  ['OK', cells]
-
+  unless needConnections
+    console.log "No need connections"
+    console.log cells
+    ['OK', {'cells':cells}]
+  else
+    connections = []
+    
+    world.connections.iter (kv)->
+      neighbors = for neighborCell in kv.v.neighbors
+        [""+neighborCell.coord.x, ""+neighborCell.coord.y]
+      connections.push [""+kv.k.x, ""+kv.k.y, kv.v.value, neighbors]
+      return
+    ['OK', {'cells':cells, 'connections':connections}]
+    
 self.addEventListener('message', onmessage, false)
-console.log("Worker started")
+console.log("Worker started 1")
 

@@ -41,6 +41,7 @@ class ToggleCellController extends BaseController
     @prevCell = localCell
     
     @app.world.setCell globalCell, @writingValue
+    @app.requestUpdateConnections() if @app.view.showConnection
     @requestRepaint()
     @app.updatePopulation()
     
@@ -134,6 +135,7 @@ class PasteController extends BaseController
     [xc, yc] = @mouse2local e
     for [x,y,s] in @selection
       @app.world.setCell @app.view.local2global([xc+x,yc+y]), s
+    @app.requestUpdateConnections()
     @requestRepaint()
     
   cancel: ->

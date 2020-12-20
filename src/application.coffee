@@ -6,7 +6,7 @@ M = require "./matrix2.coffee"
 {convexQuadPoints} = require "./geometry.coffee"
 {qform, tfm2qform}  = require "./mathutil.coffee"
 {View} = require "./view.coffee"
-{World, makeCoord, cellList2Text, sortCellList, parseCellList, parseCellListBig}= require "./world.coffee"
+{World, makeCoord, cellList2Text, sortCellList, parseCellList, parseCellListBig, newCoordHash}= require "./world.coffee"
 {ControllerHub}= require "./controller.coffee"
 CA = require "./ca.coffee"
 {BinaryTotalisticRule, CustomRule} = require "./rule.coffee"
@@ -18,6 +18,8 @@ MAX_SCALE = 100
 MIN_SCALE = 5
 LOG10 = Math.log 10
 CELL_SIZES = [0.1,0.2, 0.3, 0.4, 0.5]
+#When population is this big, external worker would be used for calculations.
+BIG_POPULATION = 200
 
 {debounce} = require "throttle-debounce"
 
@@ -68,7 +70,7 @@ class Application
     @playing = false
     
   _startWorker: ->
-    @worker = new Worker "worker.js"
+    @worker = new Worker "worker.js?buster=#{Math.random()}"
     @worker.onmessage = @_renderFinished
     return
     
@@ -165,7 +167,7 @@ class Application
     
   step: ->
     return if @_workerPending
-    if not @worker or @world.population() < 100
+    if not @worker or @world.population() < BIG_POPULATION
         @stepLocal()
     else
         @stepWorker()
@@ -191,7 +193,8 @@ class Application
     cells = []
     @world.cells.iter (kv)->
       cells.push [""+kv.k.x, ""+kv.k.y, kv.v]
-    @worker.postMessage ['render', [rtype, @rule.toString(), @world.m, @world.c, cells]]
+      return
+    @worker.postMessage ['render', [rtype, @rule.toString(), @world.m, @world.c, cells, @view.showConnection]]
     @_workerPending = true
     $("#worker-spinner").show()
     return
@@ -205,14 +208,33 @@ class Application
         #applying results
         @prevState = @world.cells
         @world.clear()
-        for [x,y,s] in data
+        for [x,y,s] in data.cells
           @world.setCell makeCoord(x,y),s
         @updatePopulation()
         @needRepaint = true
+        if data.connections?
+          @world.connections = newCoordHash()
+          cellNeighbors = []
+          for [sx, sy, value, neighbors] in data.connections
+            connectedCell = new CA.ConnectedCell makeCoord(sx,sy), value, []
+            #instead of parsing them immediately - storing for the second pass
+            cellNeighbors.push [connectedCell, neighbors] if neighbors.length
+            @world.connections.put connectedCell.coord, connectedCell
+          #second pass: parse cell to cell connections
+          for [connectedCell, neighbors] in cellNeighbors
+            for [nx, ny] in neighbors
+              coord = makeCoord nx, ny
+              connectedCell.neighbors.push @world.connections.get coord
     else
         console.log("Bad answer:"+msg)
     $("#worker-spinner").hide()
     @_scheduleStep() if @playing
+    return
+  doClear: ->
+    if @world.population() > 0
+      @prevState = @world.cells
+      @world.clear()
+      @needRepaint = true
     return
     
   cancelStep: ->
@@ -224,6 +246,15 @@ class Application
     @go() if @playing
     return
     
+
+  requestUpdateConnections: debounce 500, false, ->
+    #update information about neighbor cells
+    if @world.population() < BIG_POPULATION
+      @world.connections = CA.calculateConnections @world
+      @needRepaint = true
+    else
+      #TODO: run update connections in worker?
+    return
     
   updateCanvasSize: ->
     cont = $ "#canvas-container"
@@ -241,6 +272,7 @@ class Application
   setShowConnection: (show)->
     @view.showConnection = show
     @needRepaint = true
+    @requestUpdateConnections() if show
     return
     
   setShowEmpty: (show) ->
@@ -275,6 +307,7 @@ class Application
     
       @world.clear()
       @randomFill size, percent*0.01
+      @requestUpdateConnections()
       @updatePopulation()
     catch err
       $.notify err
@@ -546,9 +579,7 @@ $(document).ready ->
   app = new Application $("#canvas").get(0)
   app.updateCanvasSize()
   
-  $("#world-clear").click ->
-    app.world.clear()
-    app.needRepaint = true
+  $("#world-clear").click -> app.doClear()
     
   $("#fld-matrix").on 'change', (e)->
     try
@@ -684,9 +715,7 @@ $(document).ready ->
   kbDispatcher.on "]", ->app.zoomOut()
   kbDispatcher.on "+", ->app.zoomIn()
   kbDispatcher.on "-", ->app.zoomOut()
-  kbDispatcher.on "e", ->
-    app.world.clear()
-    app.needRepaint = true
+  kbDispatcher.on "e", -> app.doClear()
   kbDispatcher.on "h", ->app.navigateHome()
   kbDispatcher.on "a", ->app.onRandomFill()
   kbDispatcher.on "z", ->app.onUndo()

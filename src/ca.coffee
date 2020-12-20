@@ -173,8 +173,9 @@ exports.iterateItemPairs = iterateItemPairs = (customHashMap, onCellPair) ->
     for kv1 in previous
       onCellPair kv, kv1
     previous.push kv
+    return
 
-class ConnectedCell
+exports.ConnectedCell = class ConnectedCell
   #coord is stored for drawing purposes. ALso, to use "is" to check for equality. WIth coord, real equality check is needed.
   constructor: (@coord, @value)->
     @neighbors = [] #list of neighbor ConnectedCells
@@ -270,6 +271,7 @@ exports.calculateConnections = calculateConnections = (world)->
       #done processing neighbors
     #done cycle over previous cells
     previous.push richCell
+    return
   #Done. Now return connections map
   connections  
   
@@ -291,5 +293,6 @@ exports.step = ( world, rule ) ->
       world.cells.put kv.k, newState
     #store new value in the new state too, in order to simplify neighbor calculation
     #kv.v.value = newState
+    return
   rule.end()  
   return oldCells
