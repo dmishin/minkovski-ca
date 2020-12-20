@@ -5,6 +5,7 @@
     height: 1.5em;    
     background: url(icons.svg) no-repeat top left;
     background-size: 6em 1.5em;
+    vertical-align:middle;
 }
 .icon-connect{
     background-position: 0em 0;

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Minkovski plane cellular automata simulator help page</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="latex.css">
+    <link rel="stylesheet" type="text/css" href="icons.css">
+    
+  </head>
+  
+  <body>
+    <h1>Minkovski cellular automata simulator</h1>
+    <nav role="navigation" class="toc">
+      <h2>Contents</h2>
+      <ol>
+	<li><a href="#purpose">About the program</a>
+	<li><a href="#world">World</a>
+	  <ol>
+	    <li><a href="#lattice-matrix">Lattice matrix</a></li>
+	    <li><a href="#neighbors">Neighbors</a></li>
+	  </ol>
+	</li>
+	<li><a href="#interface">Interface</a>
+	  <ol>
+	    <li><a href="#editing-cells">Editing cells</a></li>
+	    <li><a href="#simulate">Running the automaton</a></li>
+	    <li><a href="#randomize">Random configuration</a></li>
+	    <li><a href="#cue-mark">Using cue mark</a></li>
+	    <li><a href="#copy-paste">Copying and pasting</a></li>
+	    <li><a href="#navigate">Navigation: pan, zoom, rotate</a></li>
+	    <li><a href="#display">Adjusting the display</a></li>
+	    <li><a href="#export">Exporting data</a></li>
+	  </ol>
+	</li>
+	<li><a href="#custom-rules">Custom rules</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <article>
+	<h2 id="purpose">About the program</h2>
+	<p>The purpose of <a href="index.html">this simulator</a> is to experiment with cellular automata (analogs of Game of Life), living on the <a href="https://en.wikipedia.org/wiki/Minkowski_plane">Minkovski plane</a>: an analog of the Euclidean plane governed by the pseudo-euclidean distance (note the minus sign):
+	</p>
+	$$d((x_1,y_1),(x_2,y_2)) = (x_1-x_2)^2-(y_1-y_2)^2.$$
+	
+	<h2 id="world">World</h2>
+	<h3 id="lattice-matrix">Lattice matrix</h3>
+	<p>Cellular automata in this simulator live on a lattice of regularly spaced points with a certain rotational symmetry. In the Euclidean plane, there are two such lattices: square lattice having 4-fold rotational symmetry and hexagonal lattice having 6-fold symmetry. However, in the Minkovski plane there is infinite number of such lattices.
+	</p>
+	<p>It might be not obvious, but such lattices (both Euclidean and Minkovskian) are identified by the integer matrices of determinant 1, also known as the elements of the <a href="https://en.wikipedia.org/wiki/Special_linear_group">special linear group \(SL(2,\mathbb{Z})\)</a>. 
+	</p>
+	$$M=\left(\begin{matrix}a && b\\c && d\end{matrix}\right), |M|=ad-bc=1,$$
+	$$a,b,c,d \in \mathbb{Z}.$$
+	<p>This, however, is not a one-to-one relation, since different matrices could define the same lattice. Particularly, congruent matrices generate the same lattice. The trace of the matrix (the sum of its diagonal elements \(a+c\)) determines lattice type: if \(|tr(M)|<2\), then the lattice is Euclidean, and if \(|tr(M)|>2\) then it is Minkovskian. The case when \(tr(M)=\pm 2\) is degenerate and not supported by the simulator.
+	</p>
+	<p>In the simulator, <b>Lattice matrix</b> field defines the lattice. It must contain four integers separated by spaces, in row-major order: "a b c d".
+	</p>
+	<p>Some matrices and their lattices:
+	</p>
+	<table >
+	  <thead>
+	    <tr>
+	      <th>Matrix</th>
+	      <th>Lattice</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <tr>
+	      <td>\(\left(\begin{matrix}0 && -1\\1 && 0\end{matrix}\right)\)</td>
+	      <td>Euclidean square lattice</td>
+	    </tr>
+	    <tr>
+	      <td>\(\left(\begin{matrix}1 && 1\\-1 && 0\end{matrix}\right)\)</td>
+	      <td>Euclidean hexagonal lattice</td>
+	    </tr>
+	    <tr>
+	      <td>\(\left(\begin{matrix}2 && 1\\1 && 1\end{matrix}\right)\)</td>
+	      <td>The simplest Minkovskian lattice</td>
+	    </tr>
+	  </tbody>
+	</table>
+
+	<h3 id="neighbors">Neighbors</h3>
+	<p>In cellular automata, cell state is affected by the states of its neighbors. In this simulator, all cells at the certain distance are considered neighbors. It is also possible to specify several distances. Instead of specifying the distance directly (which proved to be inconvenient), a list of sample neighbor coordinates is given. The format of the list is <code>"x1 y1;x2 y2;..."</code>
+	</p>
+	<p>Cell coordinates are not obvious, to see them enable <b>Draw</b> tool and hover the mouse above the grid. Text in the bottom left corner of the view displays cell coordinates. Alternatively, use <b>Cue</b> tool and select some cell. Cell coordinates are displayed at the same place</p>
+	
+	<h2 id="interface">Interface</h2>
+	<p>
+	  Some tools on the top toolbar are grouped in pairs. When using mouse, left mouse button activates the selected tool, and right mouse button activates its pair.
+	</p>
+	<h3 id="editing-cells">Editing cells</h3>
+	<p> Enable <b>Draw</b> tool and use mouse do toggle cells. When using <a href="#custom-rules">custom rules</a> with more than two states, additional buttons allowing to select state are shown. <b>Draw</b> tool hotkey is <kbd>D</kbd>.
+	</p>
+	<h3 id="simulate">Running the automaton</h3>
+	<p>To run the simulation for one step, use the <b>Step</b> button. Its hotkey is <kbd>N</kbd>. If the calculation takes long time, a button allowing to cancel the simulation appears.
+	</p>
+	<p>To <b>undo</b> the last simulation step, press <kbd>Z</kbd>.</p>
+	<p>To run the simulation continuously, click <b>Go</b> button.</p>
+	  
+	<h4 id="randomize">Random configuration</h4>
+	<p>To generate random configuration of cells, use controls in the "Randomize" section of the left panel. Enter the size of the random block, and the density of "alive" cells, then click <b>Random fill</b>. The hotkey is <kbd>A</kbd>.
+	</p>
+	<h3 id="cue-mark">Using cue mark</h3>
+	<p>Use <b>Cue</b> mark tool to select a cell and see its neighbors. Neighbor cells are shown with empty circles; curves of equal distance are shown by dashed lines. <b>Cue</b> cool hotkey is <kbd>U</kbd>. Alternatively, use <b>Draw</b> tool and right mouse button to put cue mark. To remove cue mark, put it on the same place, or click <b>Hide</b> button on the top toolbar.
+	</p>
+	
+	<h3 id="copy-paste">Copying and pasting</h3>
+	<p>To copy a configuration of cells, activate <b>Copy</b> tool on the top toolbar, and drag mouse over it. Selected configuration of cells is put into the "buffer" text area on the left control panel. Hotkey is <kbd>C</kbd>.
+	</p>
+	<p>To paste a copied configuration, <b>Paste</b> tool and click where to paste it. Hotkey is <kbd>P</kbd>.
+	</p>
+	<h3 id="navigate">Navigation: pan, zoom, rotate</h3>
+	<p>Use <b>Pan</b> tool to drag the view using the mouse. Alternatively, hold <kbd>Ctrl</kbd> key and drag mouse - this method works when any other tool is active</p>
+	<p>Use <b>Rotate</b> tool or drag mouse left and right holding <kbd>Shift</kbd> to rotate the view around the center. When Euclidean lattice matrix is used, this tool does a familiar Euclidean rotation. When the matrix is Minkovskian, it does pseudo-rotation (squeeze mapping).</p>
+
+	<p>To zoom the view in and out, either use mouse wheel or buttons <b>Zoom In/Out</b> on the left control panel.
+	</p>
+	<p>"Navigator" section of the left control panel shows current position and rotation of the view. Rotation angle is in degrees; when Minkovskian lattice is active, rotation angle could be arbitrarily high or low: unlike Euclidean rotation, pseudo-rotation does not loops after 360&deg;.
+	</p>
+	<h3 id="display">Adjusting the display</h3>
+	<p>
+	  Several buttons on the left panel control the appearance of the view:
+	</p>
+	<ul>
+	  <li><span class="icon icon-connect">C</span> - show lines, connecting neighbor cells. In Minkovskian lattices, neighbors are not obvious.
+	  </li>
+	  <li><span class="icon icon-empty">E</span> - show empty cells, i. e. the cells whose state is 0.
+	  </li>
+	  <li><span class="icon icon-cross">X</span> - show cross in the view center.
+	  </li>
+	  <li><span class="icon icon-numbers">N</span> - show numbers instead of colored dots.
+	  </li>
+	</ul>
+	<p>The slider above them controls the size of the colored circle of the cell image.</p>
+	
+	<h3 id="export">Exporting data</h3>
+	<p>There are two ways to export data from the simulator. The first one is to use <b>Copy</b> tool and then copy the text from the "Buffer" text area. This text can be stored, then pasted back to the buffer.
+	</p>
+	<p>The other way is to export current simulator state to the URL using the <b>Save to url...</b> button. It generates an URL that encodes current world state, rule and view position.
+	</p>
+	
+	<h2 id="custom-rules">Custom rules</h2>
+	<p>Custom rules allow to run custom automata with any number of states and user-defined transition rules. They need not be totalistic. To enable custom rule, click <b>Custom rule...</b> button and edit the code. Click <b>Basic sample</b> / <b>Complex sample</b> buttons to load sample code.
+	</p>
+	<p>
+	  Custom rule is defined by a JavaScript object having following fields:
+	</p>
+	<ul>
+	  <li><code>next</code>: required, its type is <code>function(state, sumNeighbors) -> newState</code>. Calculates new state of a cell from its current state and (generalized) sum of the neighbors.
+	  </li>
+	  <li><code>states</code>: optional integer, number of states in the automaton. Default value is 2.
+	  </li>
+	  <li><code>foldInitial</code>: optional, any type. Initial values for calculating generalized sum of neighbors. Default value is 0.
+	  </li>
+	  <li><code>fold</code>: optional, <code>function(sum, state) -> updatedSum</code>. Function to calculate generalized sum of the neighbors. Adds one neighbor state to the sum. Default is plain summation: <code>function(sum,s){return sum+s;}</code>.
+	  </li>
+	</ul>
+	<p>Note that the order of neighbor summation is not defined. Also, only cells with nonzero state are summed.
+	</p>
+      </article>
+    </main>
+    
+    <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    
+  </body>
+</html>

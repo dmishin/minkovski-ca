@@ -136,6 +136,12 @@ button.pressed{
     background-color: #afa;
 }
 
+.help-button{
+    border: 0;
+    padding: 0.5em 0.5em 0.5em 0.5em;
+    border-radius: 3px;
+    background-color: #ddd;
+}
 
 input.short{
     width: 2em;
