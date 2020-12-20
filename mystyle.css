@@ -14,7 +14,7 @@ h2{
     padding:0;
     background-color: #eee;
     border:0;
-    margin:0 0 0.5em 0;
+    margin:1em 0 0.5em 0;
 }
 
 .vertical-controls{
@@ -79,6 +79,7 @@ span.tool-group{
     padding:0;
     padding: 0 0.5em 0 0.5em;
     border-left:1px solid gray;
+    white-space: nowrap;
 }
 span.tool-group:first-child {
     border-left: none;
@@ -103,6 +104,7 @@ button.right{
     background-color: #ddd;
     margin-left:0;
 }
+
 
 button:hover{
     background-color: #ddf;

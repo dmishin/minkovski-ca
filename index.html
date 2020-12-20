@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title></title>
+    <title>Minkovski plane cellular automata simulator</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="mystyle.css">
+    <link rel="stylesheet" type="text/css" href="icons.css">
   </head>
   <body>
     <div id="controls" class="vertical-controls">
@@ -46,7 +47,7 @@
 	</tr>
 	<tr>
 	  <td>Rule</td>
-	  <td><input id="fld-rule" value="B3S23" class="long"/></td>
+	  <td><input id="fld-rule" value="B3/S23" class="long" title="Binary rule in B/S format" /></td>
 	</tr>
 	</tbody>
 	</table>
@@ -56,12 +57,12 @@
 	<h2>View</h2>
 	Zoom <button id="btn-zoom-in">In</button>/<button id="btn-zoom-out">Out</button>
 	<br/>
-	<input id="sld-cell-size" type="range" min="0" max="4"/>
+	🞄<input id="sld-cell-size" type="range" min="0" max="4" style="vertical-align:middle"/>⬤
 	<br/>
-	<button id="tb-view-connections" class="toggle" title="Show neighbor connections">C</button>
-	<button id="tb-view-empty" class="toggle" title="Show empty cells">E</button>
-	<button id="tb-view-center" class="toggle pressed" title="Show view center">X</button>
-	<button id="tb-view-numbers" class="toggle" title="Show state numbers">N</button>
+	<button id="tb-view-connections" class="toggle" title="Show neighbor connections"><span class="icon icon-connect">C</span></button>
+	<button id="tb-view-empty" class="toggle" title="Show empty cells"><span class="icon icon-empty">E</span></button>
+	<button id="tb-view-center" class="toggle pressed" title="Show view center"><span class="icon icon-cross">X</span></button>
+	<button id="tb-view-numbers" class="toggle" title="Show state numbers"><span class="icon icon-numbers">N</span></button>
 	
       </div>
       
@@ -112,7 +113,7 @@
 	  </span>
 	  <span class="tool-group">
 	    <button id="tool-draw" class="toggle pressed left" title="(D) Left button: draw cells, right: put cue mark">Draw</button><button id="tool-cue" class="toggle right" title="(U) Left button: put cue mark, right: draw cells. TO hide cue mark, press (Shift+U) or put it twice to the same place.">Cue</button>
-	    <button id="tool-cue-hide" class="" title="(Q) Hide cue mark, if shown">H</button>
+	    <button id="tool-cue-hide" class="" title="(Q) Hide cue mark, if shown">Hide</button>
 	  </span>
 	  <span class="tool-group">
 	    <button id="tool-move" class="toggle left" title="(M) Drag to move view. Right button: rotate view">Move</button><button id="tool-squeeze" class="toggle right" title="(R) Drag to rotate view. Right moue: move view">Rotate</button>
