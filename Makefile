@@ -52,7 +52,7 @@ animate-grid.gif: uploads/animate-grid-????.png
 	rm uploads/animate-grid-colormap.gif
 	rm uploads/animate-grid-????.gif
 
-publish: test all
+publish: test release
 	git checkout master
 	sh deploy.sh
 

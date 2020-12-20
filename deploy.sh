@@ -9,7 +9,7 @@ echo ==  Publishing Minkovski-ca  ==
 echo ===========================
 
 
-cp -r index.html application.js *.css LICENSE.MIT README.md $ODIR
+cp -r index.html help.html application.js mystyle.css icons.css latex.css LICENSE.MIT README.md icons.svg spinner.gif $ODIR
 
 
 echo =============================================
