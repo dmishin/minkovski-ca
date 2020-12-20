@@ -6,6 +6,10 @@ application.js: src/*.coffee
 worker.js: src/*.coffee
 	browserify -t coffeeify src/worker.coffee --debug > worker.js || rm worker.js
 
+release:
+	browserify -t coffeeify src/application.coffee > application.js || rm application.js
+	browserify -t coffeeify src/worker.coffee > worker.js || rm worker.js
+
 test:
 	mocha tests/test*.coffee --compilers coffee:coffee-script/register
 
