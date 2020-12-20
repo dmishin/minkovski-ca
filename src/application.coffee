@@ -20,6 +20,7 @@ LOG10 = Math.log 10
 CELL_SIZES = [0.1,0.2, 0.3, 0.4, 0.5]
 #When population is this big, external worker would be used for calculations.
 BIG_POPULATION = 200
+WORKER_CACHE_BUST=""+Math.random()
 
 {debounce} = require "throttle-debounce"
 
@@ -70,7 +71,7 @@ class Application
     @playing = false
     
   _startWorker: ->
-    @worker = new Worker "worker.js?buster=#{Math.random()}"
+    @worker = new Worker "worker.js?buster=#{WORKER_CACHE_BUST}"
     @worker.onmessage = @_renderFinished
     return
     
