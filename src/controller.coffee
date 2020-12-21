@@ -225,10 +225,10 @@ exports.ControllerHub = class ControllerHub
     declareAlternativePair @paste, @copy
     
     @active = @primary
+    @dragging = false
 
   setPrimary: (subcontroller)->
     return if @primary is subcontroller
-
     @active.cancel()
     @primary = subcontroller
     @active = subcontroller
@@ -239,6 +239,9 @@ exports.ControllerHub = class ControllerHub
     e.preventDefault()
     
   mousedown: (e)=>
+    console.log "mouse down, event"
+    console.log e
+    @dragging = true
     @active = if e.button is 0
       if e.shiftKey
         @shiftPrimary
@@ -251,12 +254,15 @@ exports.ControllerHub = class ControllerHub
         @shiftSecondary
       else
         @primary.alternative
-      
+    else
+      null
+    console.log {active: @active}
     if @active isnt null
       e.target.setCapture?()
       @active.mousedown e
       e.preventDefault()
-      
+    return
+    
   mouseup: (e)=>
     if @active isnt null
       try
@@ -265,7 +271,34 @@ exports.ControllerHub = class ControllerHub
         console.log err
       e.preventDefault()
       @active = @primary
-
+    @dragging = false
+    return
+    
+  touchstart: (e)=>
+    if e.touches.length is 1
+      e.button = 0
+      e.clientX = e.touches[0].clientX
+      e.clientY = e.touches[0].clientY
+      @mousedown e
+      e.preventDefault()
+  touchend: (e)=>
+    if @dragging
+      e.preventDefault()
+      e.button = 0
+      @mouseup e
+      
+  touchmove: (e)=>
+    if @dragging
+      e.clientX = e.touches[0].clientX
+      e.clientY = e.touches[0].clientY
+      e.button = 0
+      @mousemove e
+  
   attach: (canvas)->
     canvas.mousedown(@mousedown).mouseup(@mouseup).mousemove(@mousemove)
 
+    canvas.on 'touchstart', @touchstart
+    canvas.on 'touchend', @touchend
+    canvas.on 'touchmove', @touchmove
+    return
+    

@@ -597,6 +597,7 @@ $(document).ready ->
   $("#fld-rule").on 'change', (e)->
     try
       app.setRule( new BinaryTotalisticRule $("#fld-rule").val() )
+      $("#fld-rule").removeClass("inactive")
       $.notify "Rule is set to #{app.rule}", "info"
     catch err
       $.notify err
@@ -635,6 +636,7 @@ $(document).ready ->
     if dy
       #console.log [e.originalEvent.deltaY, ['pixel','line','page'][e.originalEvent.deltaMode]]
       app.zoomBy Math.pow(1.1, if dy > 0 then -1 else 1)
+    
   $("#btn-help-shortcuts").on "click", ->
     console.log("toggle help")
     $("#popup-help-shortcuts").toggle()
@@ -650,6 +652,7 @@ $(document).ready ->
       app.setRule new CustomRule $("#fld-custom-rule-code").val()
       $.notify "Rule set to custom"
       $("#popup-custom-rule").hide()
+      $("#fld-rule").addClass("inactive")
     catch e
       alert ""+e
   $("#btn-set-custom-rule-cancel").on 'click', -> $("#popup-custom-rule").hide()
