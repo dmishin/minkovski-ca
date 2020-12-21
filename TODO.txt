@@ -1,0 +1,22 @@
+* Design
+** DONE Help
+** DONE H: button: rename.
+** DONE Buttons design: left and right buttons
+** DONE "Go button"
+** DONE set selection: button not needed
+** Icons not displayed in tablet chrome?
+** mouse dragging does not work on tablet chrome?
+
+* UI
+** several cues?
+** DONE initial zoom too low
+** DONE show connections: make it work always
+*** when it is too bit, it is not updated immediately. fine?
+
+** Custom rules: UI logic unclear.
+** GO: auto stop when empty
+** GO: controllable interval
+** UNDO
+*** add UI?
+*** DONE clear must be undoable!
+*** randomize must be undoable
