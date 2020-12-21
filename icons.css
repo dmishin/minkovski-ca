@@ -1,6 +1,6 @@
 .icon{
     display: inline-block;
-    font-size: 0;
+    text-indent: -9999px;
     width: 1.5em;
     height: 1.5em;    
     background: url(icons.svg) no-repeat top left;
