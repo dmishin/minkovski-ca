@@ -4,12 +4,12 @@
   "description": "Minkovsky cellular automata simulator",
   "main": "index.js",
   "dependencies": {
-    "big-integer": "^1.6.26",
+    "big-integer": "^1.6.48",
     "hotkeys": "^1.0.0",
     "jquery": "^3.5.1",
     "notifyjs-browser": "^0.4.2",
     "throttle-debounce": "^3.0.1",
-    "url-search-params": "^0.10.0"
+    "url-search-params": "^0.10.2"
   },
   "devDependencies": {
     "coffeeify": "^3.0.1",
