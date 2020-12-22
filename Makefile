@@ -7,8 +7,8 @@ worker.js: src/*.coffee
 	browserify -t coffeeify src/worker.coffee --debug > worker.js || rm worker.js
 
 release:
-	browserify -t coffeeify src/application.coffee > application.js || rm application.js
-	browserify -t coffeeify src/worker.coffee > worker.js || rm worker.js
+	browserify -t coffeeify src/application.coffee | /home/dim/Prog/js-revca/node_modules/uglify-js/bin/uglifyjs > application.js || rm application.js
+	browserify -t coffeeify src/worker.coffee | /home/dim/Prog/js-revca/node_modules/uglify-js/bin/uglifyjs > worker.js || rm worker.js
 
 test:
 	mocha tests/test*.coffee --compilers coffee:coffee-script/register
@@ -58,3 +58,5 @@ publish: test release
 
 serve: all
 	python -m http.server --bind 127.0.0.1 8000 
+serveall: all
+	python -m http.server
