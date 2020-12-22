@@ -29,6 +29,7 @@ describe "sqrt", ->
 
   it "must work with square big ints", ->
     [y, exact] = sqrt(bigInt(10).pow(100))
+    console.log ["sqrtbig is", y, exact]
     assert.ok y.equals bigInt(10).pow(50)
     assert.ok exact
 
