@@ -13,8 +13,9 @@
   },
   "devDependencies": {
     "coffeeify": "^3.0.1",
-    "coffeescript": "^1.12.7",
-    "html-includes": "^1.2.3"
+    "coffeescript": "^2.5.1",
+    "html-includes": "^1.2.3",
+    "mocha": "^8.2.1"
   },
   "scripts": {
     "test": "make test"

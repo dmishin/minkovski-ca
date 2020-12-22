@@ -11,7 +11,7 @@ release:
 	browserify -t coffeeify src/worker.coffee | /home/dim/Prog/js-revca/node_modules/uglify-js/bin/uglifyjs > worker.js || rm worker.js
 
 test:
-	mocha tests/test*.coffee --compilers coffee:coffee-script/register
+	mocha --require coffeescript/register tests/test*.coffee
 
 animations.js: src/*.coffee
 	browserify -t coffeeify src/animations.coffee > animations.js || rm animations.js
