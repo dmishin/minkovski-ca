@@ -239,8 +239,6 @@ exports.ControllerHub = class ControllerHub
     e.preventDefault()
     
   mousedown: (e)=>
-    console.log "mouse down, event"
-    console.log e
     @dragging = true
     @active = if e.button is 0
       if e.shiftKey
@@ -256,7 +254,6 @@ exports.ControllerHub = class ControllerHub
         @primary.alternative
     else
       null
-    console.log {active: @active}
     if @active isnt null
       e.target.setCapture?()
       @active.mousedown e
