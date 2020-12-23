@@ -18,8 +18,10 @@
     "mocha": "^8.2.1"
   },
   "scripts": {
-    "test": "make test"
+      "test": "make test",
+      "postinstall": "patch-package"
   },
+    
   "author": "",
   "license": "MIT"
 }

@@ -1,6 +1,9 @@
 bigInt = require "big-integer"
 
-unless BigInt?
+#disable native bigint, because it causes performance degradation in small int case, which is the most common.
+supportsNativeBigInt = false;#typeof BigInt === "function";
+
+if not supportsNativeBigInt
 ###
 #find integer sqare root using Newton method
 #returns a tuple: (floor(sqrt(x)) :: LongInteger, is_exact_root :: bool)

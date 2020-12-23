@@ -30,14 +30,15 @@ renderDataImpl = (ruleType, ruleCode, skewMatrix, neighbors, cells, needConnecti
   for [x,y,s] in cells
     world.setCell makeCoord(x,y), s
 
+  t0 = performance.now()
   CA.step world, rule
+  t1 = performance.now()
+  console.log "Step time is #{t1-t0}ms"
 
   cells = []
   world.cells.iter (kv)->
       cells.push [""+kv.k.x, ""+kv.k.y, kv.v]
   unless needConnections
-    console.log "No need connections"
-    console.log cells
     ['OK', {'cells':cells}]
   else
     connections = []
