@@ -320,7 +320,7 @@ exports.View = class View
       context.strokeStyle = @selectedNeighborsColor
       for nxy in @displayedNeighbors
         [ndx,ndy] = M.mulv T, nxy
-        @drawCellShape context, selx+dx+ndx, sely+dy+ndy, 1
+        @drawCellShape context, selx+dx+ndx, sely+dy+ndy, 1.2
         context.stroke()
       
     if @highlightedCell isnt null
