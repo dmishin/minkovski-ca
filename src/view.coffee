@@ -422,7 +422,6 @@ exports.View = class View
           
         if @showConnection and (@world.connections isnt null)
           ccell = @world.connections.get cellCoord, null
-
           context.strokeStyle = @connectionLineColor
 
           if ccell isnt null
@@ -431,13 +430,12 @@ exports.View = class View
               #to avoid double lines
               continue if neighbor.coord.hash > cellCoord.hash
               continue if @world.getCell(neighbor.coord) is 0
-              
               #find coordinates of the neighbor in screen coords
               [nix,niy] = B.mulv @viewMatrixBig, @center.offset neighbor.coord
               #if neighbor is relatively close
-              if nix.isSmall and niy.isSmall
+              if nix.leq(DRAW_MAX) and nix.geq(DRAW_MIN) and niy.leq(DRAW_MAX) and niy.geq(DRAW_MIN)
                 #coordinates of the neighbor on the screen
-                [nx, ny] = M.mulv T, [nix.value, niy.value]
+                [nx, ny] = M.mulv T, [Number(nix), Number(niy)]
                 #draw the line
                 context.beginPath()
                 context.moveTo sx, sy
@@ -447,3 +445,5 @@ exports.View = class View
 
             
     
+DRAW_MIN = bigInt(-10000)
+DRAW_MAX = bigInt(10000)
