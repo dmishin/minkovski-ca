@@ -7,11 +7,15 @@ worker.js: src/*.coffee
 	browserify -t coffeeify src/worker.coffee --debug > worker.js || rm worker.js
 
 release:
-	browserify -t coffeeify src/application.coffee | /home/dim/Prog/js-revca/node_modules/uglify-js/bin/uglifyjs > application.js || rm application.js
-	browserify -t coffeeify src/worker.coffee | /home/dim/Prog/js-revca/node_modules/uglify-js/bin/uglifyjs > worker.js || rm worker.js
+	browserify -t coffeeify src/application.coffee  > application.js || rm application.js
+	browserify -t coffeeify src/worker.coffee  > worker.js || rm worker.js
 
 test:
 	mocha --require coffeescript/register tests/test*.coffee
+
+test1:
+	mocha --require coffeescript/register tests/*native*.coffee
+
 
 animations.js: src/*.coffee
 	browserify -t coffeeify src/animations.coffee > animations.js || rm animations.js
