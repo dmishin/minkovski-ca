@@ -58,3 +58,9 @@ describe "World", ->
     assert.throws -> new World [1,0,0,1], [[1,0]]
 
   
+  it "must support putPattern", ->
+    w = new World [2, 1, 1, 1], [[1,0]]
+    w.putPattern makeCoord(4,5), [[1,2,3],[2,3,4]]
+    assert.equal w.getCell(makeCoord(5,7)), 3
+    assert.equal w.getCell(makeCoord(6,8)), 4
+    

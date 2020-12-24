@@ -102,6 +102,11 @@ exports.World = class World
       @cells.put coord, state
     return
 
+  putPattern: (coord, celllist)->
+    for xys in celllist
+      @setCell coord.translate(xys), xys[2]
+    return
+
   #convenience toggle method.
   toggle: (coord, state=1) ->
     old = @cells.get coord, 0

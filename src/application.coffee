@@ -357,6 +357,18 @@ class Application
     if preset.neighbors?
       #@setNeighborVectors parseNeighborSamples preset.neighbors
       $("#fld-sample-neighbor").val(preset.neighbors).trigger('change')
+
+    if preset.pattern?
+      cells = parseCellList preset.pattern
+      @world.putPattern makeCoord(0,0), cells
+
+    if preset.rule?
+      @setRule new BinaryTotalisticRule preset.rule
+      $("#fld-rule").val( ""+@rule )
+    if preset.customrule
+      console.log preset.customrule
+      @setRule new CustomRule preset.customrule
+      $("#fld-custom-rule-code").val preset.customrule
       
   hideCueMarker: ->
     @view.selectedCell = null
@@ -411,8 +423,7 @@ class Application
       
     if params.has 'cells'
       cells = parseCellListBig params.get 'cells'
-      for [x,y,s] in cells
-        @world.setCell makeCoord(x,y),s
+      @world.putPattern makeCoord(0,0), cells
 
     if params.has 'rule'
       @setRule new BinaryTotalisticRule params.get 'rule'
@@ -637,9 +648,8 @@ $(document).ready ->
       #console.log [e.originalEvent.deltaY, ['pixel','line','page'][e.originalEvent.deltaMode]]
       app.zoomBy Math.pow(1.1, if dy > 0 then -1 else 1)
     
-  $("#btn-help-shortcuts").on "click", ->
-    console.log("toggle help")
-    $("#popup-help-shortcuts").toggle()
+  $("#btn-help-shortcuts").on "click", ->  $("#popup-help-shortcuts").toggle()    
+  $("#btn-examples").on "click", ->  $("#popup-examples").toggle()
     
   $("#btn-zoom-in").on "click", ->app.zoomIn()
   $("#btn-zoom-out").on "click", ->app.zoomOut()
@@ -673,8 +683,8 @@ $(document).ready ->
     app.needRepaintCtl=true
   $("#btn-show-custom").on 'click', -> $("#popup-custom-rule").toggle()
   $("div.popup").on 'click', (e) ->
-    $(this).toggle()
-  $("div.popup").children().on 'click', -> false
+    if e.target is this
+      $(this).toggle()
 
   $("#btn-save-url").on 'click', ->
     $("#fld-save-url").val(window.location.href.split('?')[0]+"?"+app.saveToUrlParams())
