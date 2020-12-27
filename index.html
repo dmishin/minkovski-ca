@@ -11,6 +11,7 @@
       <div class="sub-panel">
 	<a class="help-button" href="help.html" target="_blank">Help</a>
 	<button id="btn-help-shortcuts"  title="Show information on keyboard shortcuts">Shortcuts</button>
+	<button id="btn-examples"  title="Show examples gallery">Examples</button>
 	<h2>World</h2>
 	<select id="fld-load-preset" title="Load one of predefined configurations">
 	  <option value="none" selected disabled>Load preset</option>
@@ -32,9 +33,7 @@
 	    <option value="{'matrix':'5 4 1 1', 'neighbors':'1 0'}">
 	      tr=5
 	    </option>
-	    
 	  </optgroup>
-	  
 	</select>
 	<br/>
 	<table>
@@ -212,6 +211,57 @@
 	</table>
       </div>
     </div>
+    <div id="popup-examples" class="popup" style="display:none">
+      <div class="popup-box">
+	<h1>Examples gallery</h1>
+	<h2>Custom rules</h2>
+	<p>
+	<a class="reference" href="?matrix=2+1+1+1&neighbors=1+0&center=0%2C0&angle=0&customrule=%7B%0A++++states%3A+9%2C%0A++++foldInitial%3A+null%2C%0A++++stats%3A+null%2C%0A%0A++++fold%3A+function%28sum%2C+s%29%7B%0A%09if%28s%3D%3D%3D0%29+return+sum%3B%0A%09if%28sum%3D%3Dnull%29%7B%0A%09++++sum+%3D+new+Array%28this.states-1%29%3B%0A%09++++for%28var+i%3D0%3B+i%21%3Dsum.length%3B+%2B%2Bi%29%0A%09%09sum%5Bi%5D+%3D+0%3B%0A%09%7D%0A%09sum%5Bs-1%5D+%2B%3D+1%3B%0A%09return+sum%0A++++%7D%2C%0A%0A++++%2F%2Ftransition+map%3A+key+is+the+state+%2B+neighbor+states+code%2C+value+is+next+state%0A++++map%3A%7B%0A%09%2F%2Ffirst+step%0A%09%221+22%22%3A1%2C%0A%09%222+1344%22%3A+5%2C%0A%09%223+244%22%3A+6%2C%0A%09%224+234%22%3A+7%2C%0A%09%224+234%22%3A+7%2C%0A%09%220+14%22%3A+8%2C%0A%09%2F%2F2nd+step%0A%09%221+5588%22%3A+1%2C%0A%09%227+5678%22%3A++3%2C%09%0A%09%227+567%22%3A+0%2C%0A%09%228+17%22%3A+2%2C%0A%09%220+78%22%3A+4%2C%0A%0A%09%222+13444%22%3A+5%2C%0A%09%221+558888%22%3A+1%2C%0A++++%7D%2C%0A++++next%3A+function%28s%2C+sum%29%7B%0A++++++++%2F%2Fconstruct+easy+to+read+state+code%0A%09var+sss%3D%22%22%2Bs%2B%22+%22%3B%0A%09if+%28sum%21%3Dnull%29%7B%0A%09++++for%28var+i%3D0%3B+i%21%3Dsum.length%3B+i%2B%2B%29%7B%0A%09%09var+si+%3D+sum%5Bi%5D%3B%0A%09%09for%28var+j%3D0%3Bj%21%3Dsi%3Bj%2B%2B%29%7B%0A%09%09++++sss+%3D+sss+%2B+%28i%2B1%29%3B%0A%09%09%7D%0A%09++++%7D%0A%09%7D%09%0A%09if+%28sss+in+this.map%29%0A%09++++return+this.map%5Bsss%5D%0A%09else%0A%09++++return+0%09%0A++++%7D%0A%7D%0A&cells=0+0+1%3B0+1+3%3B1+1+4%3B3+-3+4%3B-1+-1+4%3B0+-1+3%3B-2+0+4%3B-1+0+2%3B1+0+2%3B2+0+4%3B-3+3+4">Rotating spaceship</a> -
+	a pattern that exhibits behavior only possible in Minkovski plane: infinite (pseudo) rotation.
+	It quickly goes out of sight, so use "Rotate" tool to follow it. This pattern uses specially engineered custom rule with 9 states.
+	</p>
+	
+	<h2>Reversible second-order automaton</h2>
+	<p>This <a class="reference" href="/?matrix=2+1+1+1&neighbors=1+0&center=7%2C2&angle=0.5300000000000002&customrule=%7B%0A++%2F%2FSecond-order+reversible+cellular+automaton+%28see+wikpedia%29%0A++%2F%2Fset+to+false+to+go+back+in+time%0A++forward%3Atrue%2C%0A++%2F%2Fbase+binary+rule%0A++simple%3A+new+BinaryTotalisticRule%28%22B3S23%22%29%2C%0A%0A++states%3A+4%2C%0A++foldInitial%3A+0%2C%0A++%2F%2Flower+bit+of+state+is+current+state%2C+higher+is+past.%0A++fold%3A+function%28sum%2C+state%29%7B%0A++++return+sum%2B%28this.flip%28state%29%261%29%3B%0A++%7D%2C%0A%0A++next%3A+function%28state%2C+sum%29%7B%0A+++++state%3Dthis.flip%28state%29%3B%0A+++++%2F%2Fignore+higher+%28old%29+bit+of+the+state+%0A+++++var+oldState+%3D+%28state+%3E%3E+1%29%261%3B%0A+++++state+%3D+state+%26+1%3B%0A+++++%2F%2Fcalcualte+new+state+using+old+rule%0A+++++var+newState+%3D+this.simple.next%28state%2C+sum%29%3B%0A+++++%2F%2Freturn+new+state+into+the+lower+bit%2C+and+put+current+state+into+higher%0A+++++return+this.flip%28%28newState%5EoldState%29+%7C+%28%28state+%26+1%29%3C%3C1%29%29%3B%0A++%7D%2C%0A%0A++%2F%2FWHen+going+backward+in+time%2C+flip+two+bits+of+the+state%0A++flip%3A+function%28s%29%7B%0A+++++return+this.forward%3F+s+%3A+%28%28s%261%29%3C%3C1%29+%7C+%28%28s%262%29%3E%3E1%29%3B%0A++%7D%0A%0A%7D&cells=0+0+1%3B0+2+2%3B1+1+3%3B1+2+3%3B2+2+2%3B3+3+2%3B4+4+2%3B9+0+3%3B9+1+2%3B9+2+3%3B10+0+3%3B10+1+1%3B10+2+2%3B10+3+3%3B11+2+1%3B11+3+2%3B11+4+1%3B12+1+2%3B12+2+2%3B12+4+3%3B12+5+2%3B13+3+1%3B13+6+2%3B17+5+2%3B17+7+3%3B17+9+2%3B17+10+3%3B18+5+2%3B18+6+2%3B18+7+3%3B18+9+2%3B18+10+3%3B18+11+1%3B19+6+3%3B19+7+1%3B19+8+3%3B19+9+3%3B19+10+3%3B19+12+2%3B20+6+2%3B20+8+3%3B20+10+2%3B20+12+3%3B21+7+3%3B21+8+3%3B21+10+3%3B21+11+3%3B21+12+2%3B25+11+2%3B-1+1+2%3B23+11+2%3B19+13+2%3B23+12+2%3B4+3+1%3B22+8+3%3B24+9+2%3B23+7+2%3B16+11+3%3B16+10+1%3B23+10+3%3B24+11+3%3B22+7+3%3B23+8+1%3B7+5+2%3B9+6+1%3B22+10+3%3B22+9+3%3B17+11+2%3B0+-5+3%3B8+0+3%3B-5+-8+1%3B-4+-8+2%3B3+-3+1%3B2+-3+3%3B-3+-6+2%3B-11+-11+2%3B11+5+2%3B16+8+1%3B3+0+1%3B8+2+2%3B6+5+3%3B5+5+2%3B8+6+2%3B6+1+1%3B1+-2+1%3B7+0+2%3B8+-1+1%3B6+-2+2%3B16+7+3%3B15+8+3%3B14+9+1%3B3+-1+1%3B5+0+3%3B16+5+2%3B14+8+2%3B14+5+1%3B1+-3+1%3B-4+-6+2%3B-5+-3+3%3B-4+-2+1%3B-5+-1+2%3B-3+-2+1%3B10+6+1%3B-1+-5+2%3B-6+-8+3%3B12+7+2%3B11+8+3%3B-3+-1+3%3B-4+-1+3%3B-6+-2+2%3B9+7+1%3B8+7+2%3B-9+-4+1%3B10+7+3%3B11+7+1%3B12+8+2%3B0+-3+3%3B-5+-6+2%3B-4+-7+3%3B-7+-3+3%3B-2+0+2%3B-2+-1+2%3B-2+-2+3%3B-1+-3+1%3B0+-4+1%3B1+-5+2%3B-5+-7+2%3B11+6+2%3B16+9+1%3B-4+-3+3%3B9+5+2%3B-3+-3+3%3B-1+-6+3%3B-2+-4+3%3B-1+-2+2%3B12+6+3%3B-1+-1+3%3B-14+-9+2%3B0+-1+3%3B2+-4+1%3B7+-1+3%3B-6+-9+2%3B-6+-4+3%3B-8+-5+3%3B-10+-6+3%3B-8+-9+2%3B-7+-5+3%3B-8+-4+3%3B-6+-6+3%3B-4+-5+1%3B-9+-6+3%3B-11+-7+2%3B-8+-6+1%3B1+0+3%3B2+1+1%3B4+2+1%3B2+-1+2%3B15+7+2%3B3+-2+3%3B5+-1+3%3B-2+-5+3%3B-3+-5+3%3B-3+-4+3%3B-4+-4+3%3B-6+-5+3%3B5+3+1%3B6+2+1%3B7+4+2%3B8+3+2%3B6+4+1%3B5+4+2%3B8+1+2%3B6+3+3%3B7+2+3%3B3+1+3%3B5+2+1%3B8+4+3%3B13+7+3%3B14+7+3%3B16+4+3%3B4+0+3%3B5+1+3%3B7+3+3%3B9+4+3%3B10+4+1%3B14+6+3%3B15+6+2%3B14+4+3%3B16+6+1%3B15+4+2"
+		   >example</a> uses custom rule with 4 states to implement Fredkin second-order reversible automaton (<a href="https://en.wikipedia.org/wiki/Second-order_cellular_automaton">Wikipedia</a>).
+	  Evaluate it for 8 steps to see a result. To change evaluation direction (forward or backward in time), click <b>Custom rule...</b> and change the value of the <code>forward</code> field.
+	  
+	<h2>Simple binary rules</h2>
+	<p>Here is a catalog of some patterns, found in the binary rules. All binary rules exhibit "explosive" (Wolfram class 3) behavior when population exceeds some critical value.</p>
+	
+<table>
+  <tbody>
+    <tr><td class="subheader" colspan="2">Lattice:2 1 1 1 neighbors:1 0 rule:B3/S23</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=0%20-2%201%3B1%20-2%201%3B1%20-1%201%3B2%20-1%201%3B-2%200%201%3B-3%201%201%3B-2%201%201%3B-1%201%201%3B0%201%201%3B-1%202%201%3B0%202%201">Period 4 oscillator</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=0%20-1%201%3B1%20-1%201%3B-1%200%201%3B0%200%201%3B-1%201%201%3B0%201%201%3B-2%202%201%3B-1%202%201">6-block</a></td><td>Still</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=2%204%201%3B2%200%201%3B1%200%201%3B-5%200%201%3B-3%20-3%201%3B-1%20-2%201%3B-4%201%201%3B-6%200%201%3B-4%20-3%201%3B-2%20-2%201">P6 "Interacting cubes"</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=0%207%201%3B1%20-3%201%3B-9%202%201%3B-4%20-6%201%3B-1%200%201%3B-6%20-3%201%3B-1%2010%201%3B0%208%201%3B-11%205%201%3B1%206%201%3B1%207%201%3B2%206%201%3B-6%208%201%3B-1%209%201%3B-2%2010%201">P4 "big and small"</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=-2%20-4%201%3B-3%20-3%201%3B0%20-3%201%3B-1%20-2%201%3B-4%20-1%201%3B3%20-1%201%3B-5%200%201%3B-2%200%201%3B-3%201%201%3B4%201%201%3B1%202%201%3B3%203%201%3B2%204%201">P6 "hypercube"</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=-1%20-4%201%3B-1%20-5%201%3B0%20-5%201%3B2%20-4%201%3B1%20-3%201%3B-2%20-4%201%3B-1%20-1%201%3B-5%206%201%3B-6%207%201%3B-5%207%201%3B-4%206%201%3B0%20-3%201">P22 "cube collision"</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=0%209%201%3B-2%203%201%3B-4%206%201%3B-3%203%201%3B-2%207%201%3B-3%207%201%3B-1%208%201%3B3%206%201%3B2%20-1%201%3B2%206%201%3B5%200%201%3B4%200%201%3B3%20-1%201">P22 unnamed</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=0%204%201%3B4%20-3%201%3B5%20-4%201%3B2%201%201%3B1%201%201%3B2%200%201%3B3%20-2%201%3B9%201%201%3B10%20-1%201%3B3%20-1%201%3B8%202%201%3B5%207%201%3B7%204%201%3B4%20-2%201">P3</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=0%20-5%201%3B1%20-5%201%3B2%20-5%201%3B1%20-4%201%3B2%20-4%201%3B3%20-4%201%3B-5%203%201%3B-3%203%201%3B-4%204%201%3B-2%204%201%3B-1%204%201">P4</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=0%200%201%3B3%20-4%201%3B-2%204%201%3B0%204%201%3B0%205%201%3B-6%201%201%3B-3%204%201%3B2%20-4%201%3B-1%200%201%3B1%20-3%201%3B1%205%201%3B-5%201%201%3B3%206%201%3B8%209%201%3B7%209%201%3B2%20-3%201%3B-1%205%201">P7</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=-6%20-3%201%3B-7%20-2%201%3B-8%20-2%201%3B-6%20-1%201%3B-5%20-3%201%3B7%205%201%3B-4%20-2%201%3B7%207%201%3B-5%20-1%201%3B6%206%201%3B8%205%201%3B6%208%201%3B-7%200%201">P24</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=-2%201%201%3B-1%201%201%3B-3%201%201%3B-1%202%201%3B-2%202%201%3B1%202%201%3B5%204%201%3B3%203%201%3B4%204%201%3B0%202%201%3B-4%201%201">P5</a></td><td>Oscillator</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200&rule=B3%2FS23&cells=1%20-8%201%3B0%20-7%201%3B-1%20-7%201%3B-9%207%201%3B-8%206%201%3B0%20-8%201%3B-10%209%201%3B-11%209%201%3B-6%201%201%3B-8%207%201%3B-7%206%201%3B2%20-7%201%3B-8%209%201%3B1%20-7%201%3B-4%201%201%3B-3%201%201%3B-10%208%201">P9</a></td><td>Oscillator</td></tr>
+    <tr><td class="subheader" colspan="2">Lattice:2 1 1 1 neighbors:1 0;0 1 rule:B4/S34</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200%3B0%201&rule=B4%2FS34&cells=-1%20-2%201%3B-1%20-1%201%3B0%20-1%201%3B-1%200%201%3B0%200%201%3B1%200%201">Oscillator with relatively high period, composed of triangles</a></td><td>Oscillator</td></tr>
+    <tr><td class="subheader" colspan="2">Lattice:2 1 1 1 neighbors:1 0;2 0 rule:B3/S23</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200%3B2%200&rule=B3%2FS23&cells=0%20-2%201%3B3%20-2%201%3B0%20-1%201%3B-1%200%201%3B0%201%201">The simplest spaceship</a></td><td>Spaceship</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200%3B2%200&rule=B3%2FS23&cells=-4%20-3%201%3B-4%20-2%201%3B-1%200%201%3B2%200%201%3B0%201%201%3B3%201%201%3B-1%203%201">Heavier spaceship</a></td><td>Spaceship</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200%3B2%200&rule=B3%2FS23&cells=-3%204%201%3B-3%205%201%3B-1%20-2%201%3B-1%201%201%3B0%20-1%201%3B2%20-2%201%3B3%20-4%201%3B3%20-1%201">Heavy spaceship</a></td><td>Spaceship</td></tr>
+    <tr><td><a class="reference" href="/?matrix=2%201%201%201&neighbors=1%200%3B2%200&rule=B4%2FS345&cells=%20-2%201%201%3B-1%200%201%3B2%200%201%3B2%20-1%201%3B-1%201%201%3B0%201%201%3B1%201%201">Rare oscillator</a></td><td>Oscillator</td></tr>
+    <tr><td class="subheader" colspan="2">Lattice:10 3 3 1 neighbors:1 0;1 -1 rule:B3/S23</td></tr>
+    <tr><td><a class="reference" href="/?matrix=10%203%203%201&neighbors=1%200%3B1%20-1&rule=B3%2FS23&cells=-9%20-2%201%3B-6%20-1%201%3B-5%20-1%201%3B-2%200%201%3B1%201%201%3B6%202%201%3B8%203%201%3B9%203%201">P6 spaceship</a></td><td>Spaceship</td></tr>
+    <tr><td class="subheader" colspan="2">Lattice:10 3 3 1 neighbors:1 0;1 -1;1 1;0 1 rule:B4/S34</td></tr>
+    <tr><td><a class="reference" href="/?matrix=10%203%203%201&neighbors=1%200%3B1%20-1%3B1%201%3B0%201&rule=B4%2FS34&cells=-2%207%201%3B0%200%201%3B0%201%201%3B1%20-2%201%3B2%20-6%201">P6 "caterpillar"</a></td><td>Spaceship</td></tr>
+    <tr><td><a class="reference" href="/?matrix=10%203%203%201&neighbors=1%200%3B1%20-1%3B1%201%3B0%201&rule=B4%2FS34&cells=0%20-2%201%3B0%20-1%201%3B-1%200%201%3B-1%201%201%3B0%201%201%3B-1%202%201">P6 "orthogonal caterpillar"</a></td><td>Spaceship</td></tr>
+  </tbody>
+</table>
+
+    </div></div>
+    
     <script src="application.js"></script>
   </body>
 </html>

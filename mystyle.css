@@ -173,6 +173,8 @@ div.popup-box{
     background-color: white;
     width: 40em;
     margin: 0 auto;
+    overflow: auto;
+    max-height:100%;
 }
 
 
@@ -209,12 +211,21 @@ div.popup  td{
     padding: 0.5em 1em 0.5em 1em;
 }
 
+div.popup  th{
+    text-align: left;
+    background-color: #eee;
+    font-weight: bold;
+}
 div.popup  td.subheader{
     text-align: center;
-    background-color: silver;
+    background-color: #eee;
     font-weight: bold;
 }
 
 div.popup  tr:hover{
     background-color:#ddf;
+}
+
+div.popup h2{
+    background-color:#fff;
 }

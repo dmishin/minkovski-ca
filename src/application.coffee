@@ -395,18 +395,19 @@ class Application
         mtx = params.get 'matrix'
         @setLatticeMatrix parseMatrix mtx
         $("#fld-matrix").val(mtx)
+        $.notify "Lattice matrix is set to#{JSON.stringify mtx}", "info"
       catch err
         alert "Bad matrix in url: #{mtx}, #{err}"
-        return
+
     if params.has 'neighbors'
       try
         neighbors = params.get 'neighbors'
         @world.setNeighborVectors parseNeighborSamples neighbors
         @view.updateWorld()
         $("#fld-sample-neighbor").val(neighbors)
+        $.notify "Sample neighbors are set to#{neighbors}", "info"
       catch err
-        alert "Bad neighbor samepls in url: #{neighbors}, #{err}"
-        return
+        alert "Bad neighbor samples in url: #{neighbors}, #{err}"
         
     if params.has 'center'
       [sx,sy] = params.get('center').split(',')
@@ -423,14 +424,18 @@ class Application
       
     if params.has 'cells'
       cells = parseCellListBig params.get 'cells'
+      @world.clear()
       @world.putPattern makeCoord(0,0), cells
+      @view.selectedCell = null
 
     if params.has 'rule'
       @setRule new BinaryTotalisticRule params.get 'rule'
       $("#fld-rule").val( ""+@rule )
+      $.notify "Rule is set to#{@rule}", "info"
     if params.has 'customrule'
       @setRule new CustomRule params.get 'customrule'
       $("#fld-custom-rule-code").val params.get 'customrule'
+      $.notify "Rule is set to custom rule", "info"
     @needRepaint=true
     @needRepaintCtl=true
 
@@ -767,7 +772,14 @@ $(document).ready ->
       history.pushState "", document.title, window.location.pathname
     catch
       #ignore
-  
+
+  $("a.reference").on 'click', (e)->
+    console.log e.target.href
+    url = new URL e.target.href
+    app.loadFromUrlParams new URLSearchParams url.search
+    $("div.popup").hide()
+    return false
+    
   $(window).resize -> app.updateCanvasSize()
     
 
