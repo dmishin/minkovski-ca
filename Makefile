@@ -18,7 +18,7 @@ test1:
 
 
 animations.js: src/*.coffee
-	browserify -t coffeeify src/animations.coffee > animations.js || rm animations.js
+	browserify -t coffeeify src/animations.coffee --debug > animations.js || rm animations.js
 
 
 animate-rotation.gif: uploads/animate-rotation-????.png
@@ -41,6 +41,7 @@ animate-toppler.gif: uploads/animate-toppler-????.png
 	gifsicle --delay=3 --loopcount=0 -O3 uploads/animate-toppler-????.gif > animate-toppler.gif
 	echo Cleanup
 	rm uploads/animate-toppler-colormap.gif
+	echo rm uploads/animate-toppler-????.gif
 
 
 
