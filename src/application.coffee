@@ -86,6 +86,7 @@ class Application
     
   repaintView: ->
     if @view isnt null
+      @context.clearRect 0, 0, @canvas.width, @canvas.height
       @view.drawGrid @canvas, @context
 
   repaintControls: ->

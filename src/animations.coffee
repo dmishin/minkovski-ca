@@ -142,22 +142,25 @@ animateRotations = ->
         drawPath path, tfm
       return
 
-  generateAnimation nframes, "animate-rotation-", (step)->
+  generateAnimation nframes, 1, "animate-rotation-", (step)->
     angle = Math.sin(step / nframes * 2 * Math.PI)
     drawFrame angle
 
-generateAnimation = (nframes, filePrefix, drawFrame)->
+generateAnimation = (nframes, subframes, filePrefix, drawFrame)->
   runUpload = (step)->
     if step is nframes
       console.log "Uploads done for #{filePrefix}"
       return
-    drawFrame step
+
+    for ss in [0...subframes]    
+      drawFrame step+(ss/subframes)
+      
     uploadToServer "#{filePrefix}#{pad0 4, step}.png", (ajax)->
-      if ajax.status isnt 200
-        console.log "Error"
-        console.log ajax
-      else
-        runUpload step+1
+        if ajax.status isnt 200
+          console.log "Error"
+          console.log ajax
+        else
+          runUpload step+1
   runUpload(0)
   
 
@@ -255,13 +258,14 @@ animateLattice = ->
       drawLattice mainColor, M.mul tfm, minLattice
       
 
-  generateAnimation nframes, "animate-grid-", (step)->
+  generateAnimation nframes, 1, "animate-grid-", (step)->
     t = step / nframes
     t = 0.5 - 0.5*Math.cos(t * Math.PI)
     drawFrame "rgba(0,0,255,0.2)", "black", t
 
 animateRotatingPattern = ->
-  nframes = 10 
+  nframes = 120
+  subframes = 5
   rotspeed = 0.5
   nsteps = 4
   scale = 20
@@ -342,9 +346,9 @@ animateRotatingPattern = ->
   
   M = [2, 1, 1, 1]      
   world = new World M, [[1,0]]
-  for [x,y,s] in topplerPattern
-    world.setCell makeCoord(x, y), s
-
+  world.putPattern makeCoord(0,0), topplerPattern
+  world.connections = CA.calculateConnections world
+  
   view = new View world
   #view.drawCellShape = view.drawCellShapeStar
   view.showStateNumbers = false
@@ -352,7 +356,8 @@ animateRotatingPattern = ->
   view.showConnection = false
   view.setScale scale
   view.setCellSizeRel cellSize
-  view.emptyCellColor = '#999'
+  view.emptyCellColor = '#ccc'
+  view.showConnection = true
   
   size = Math.min((canvas.width*0.5) | 0, canvas.height) - margin
   
@@ -362,8 +367,10 @@ animateRotatingPattern = ->
   
   lastGeneration = 0
 
+  ctx.fillStyle = "#fff" 
+  ctx.fillRect 0, 0, canvas.width, canvas.height
   
-  generateAnimation nframes, "animate-toppler-", (step)->
+  generateAnimation nframes, subframes, "animate-toppler-", (step)->
     t = step / nframes
     generation = Math.floor t*nsteps
     
@@ -371,11 +378,11 @@ animateRotatingPattern = ->
       lastGeneration = generation
       CA.step world, rule
   
-    ctx.fillStyle = "#ff0" 
+    ctx.fillStyle = "rgb(255,255,255,0.1)" 
     ctx.fillRect 0, 0, canvas.width, canvas.height
     
     view.drawGrid canvas, ctx, 20
-    view.incrementAngle (world.angle/nframes*nsteps*rotspeed)
+    view.incrementAngle (world.angle/(nframes*subframes)*nsteps*rotspeed)
     
   
 $("#btn-run-rotations").on 'click', -> animateRotations()

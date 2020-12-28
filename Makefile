@@ -38,10 +38,9 @@ animate-toppler.gif: uploads/animate-toppler-????.png
 	echo Convert images to colormap
 	mogrify -format gif +dither -map uploads/animate-toppler-colormap.gif uploads/animate-toppler-????.png
 	echo Collect GIF
-	gifsicle --delay=5 --loopcount=0 -O3 uploads/animate-toppler-????.gif > animate-rotation.gif
+	gifsicle --delay=3 --loopcount=0 -O3 uploads/animate-toppler-????.gif > animate-toppler.gif
 	echo Cleanup
 	rm uploads/animate-toppler-colormap.gif
-	rm uploads/animate-toppler-????.gif
 
 
 
@@ -64,3 +63,6 @@ serve: all
 	python -m http.server --bind 127.0.0.1 8000 
 serveall: all
 	python -m http.server
+serve-upload: animations.js
+	python http_server_with_upload.py
+

@@ -389,9 +389,6 @@ exports.View = class View
     #transform it to the integer lattice
     iquad  = (M.mulv(invT, vi) for vi in quad)
 
-    context.clearRect(0, 0, canvas.width, canvas.height)
-    #get points and draw them
-
     invViewBig = B.adjoint @viewMatrixBig
     context.save()
     context.translate width/2, height/2
