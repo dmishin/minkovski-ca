@@ -440,6 +440,16 @@ class Application
     @needRepaint=true
     @needRepaintCtl=true
 
+  connectionsGraph: ->
+    connections = []
+    n2s = (coord)->"N#{coord.x}_#{coord.y}"
+    @world.connections.iter (kv)->
+      for neighbor in kv.v.neighbors
+        continue if neighbor.coord.hash > kv.k.hash
+        connections.push [n2s(kv.k), n2s(neighbor.coord)]
+       return
+    return connections
+
 class StateSelector
   constructor: (@app)->
     @elem = $("#state-selector")
@@ -451,7 +461,7 @@ class StateSelector
   setNumStates: (n)->
     return if n is @nstates
     if n < 2 then throw new Error "Number os states can't be < 2"
-      
+    @activeState = 1      
     @nstates = n
     @_updateSelector()
     if @nstates is 2
@@ -595,6 +605,7 @@ CodeSamples =
 
 $(document).ready ->
   app = new Application $("#canvas").get(0)
+  window.App = app
   app.updateCanvasSize()
   
   $("#world-clear").click -> app.doClear()
