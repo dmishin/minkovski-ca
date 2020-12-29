@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Minkovski plane cellular automata simulator help page</title>
+    <title>Minkowski plane cellular automata simulator help page</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="latex.css">
     <link rel="stylesheet" type="text/css" href="icons.css">
@@ -9,7 +9,7 @@
   </head>
   
   <body>
-    <h1>Minkovski cellular automata simulator</h1>
+    <h1>Minkowski cellular automata simulator</h1>
     <nav role="navigation" class="toc">
       <h2>Contents</h2>
       <ol>
@@ -41,24 +41,24 @@
     <main>
       <article>
 	<h2 id="purpose">About the program</h2>
-	<p>The purpose of <a href="index.html">this simulator</a> is to experiment with cellular automata (analogs of Game of Life), living on the <a href="https://en.wikipedia.org/wiki/Minkowski_plane">Minkovski plane</a>: an analog of the Euclidean plane governed by the pseudo-euclidean distance (note the minus sign):
+	<p>The purpose of <a href="index.html">this simulator</a> is to experiment with cellular automata (analogs of Game of Life), living on the <a href="https://en.wikipedia.org/wiki/Minkowski_plane">Minkowski plane</a>: an analog of the Euclidean plane governed by the pseudo-euclidean distance (note the minus sign):
 	</p>
 	$$d((x_1,y_1),(x_2,y_2)) = (x_1-x_2)^2-(y_1-y_2)^2.$$
 	<figure>
-	  <img src="animate-rotation.gif" alt="Animated image of rotations in Euclidean and Minkovsky spaces">
+	  <img src="animate-rotation.gif" alt="Animated image of rotations in Euclidean and Minkowsky spaces">
 	  <figcaption>
-	    Rotations in Euclidean and Minkovsky spaces
+	    Rotations in Euclidean and Minkowsky spaces
 	  </figcaption>
 	</figure>
 	<h2 id="world">World</h2>
 	<h3 id="lattice-matrix">Lattice matrix</h3>
-	<p>Cellular automata in this simulator live on a lattice of regularly spaced points with a certain rotational symmetry. In the Euclidean plane, there are two such lattices: square lattice having 4-fold rotational symmetry and hexagonal lattice having 6-fold symmetry. However, in the Minkovski plane there is infinite number of such lattices.
+	<p>Cellular automata in this simulator live on a lattice of regularly spaced points with a certain rotational symmetry. In the Euclidean plane, there are two such lattices: square lattice having 4-fold rotational symmetry and hexagonal lattice having 6-fold symmetry. However, in the Minkowski plane there is infinite number of such lattices.
 	</p>
-	<p>It might be not obvious, but such lattices (both Euclidean and Minkovskian) are identified by the integer matrices of determinant 1, also known as the elements of the <a href="https://en.wikipedia.org/wiki/Special_linear_group">special linear group \(SL(2,\mathbb{Z})\)</a>. 
+	<p>It might be not obvious, but such lattices (both Euclidean and Minkowskian) are identified by the integer matrices of determinant 1, also known as the elements of the <a href="https://en.wikipedia.org/wiki/Special_linear_group">special linear group \(SL(2,\mathbb{Z})\)</a>. 
 	</p>
 	$$M=\left(\begin{matrix}a && b\\c && d\end{matrix}\right), |M|=ad-bc=1,$$
 	$$a,b,c,d \in \mathbb{Z}.$$
-	<p>This, however, is not a one-to-one relation, since different matrices could define the same lattice. Particularly, congruent matrices generate the same lattice. The trace of the matrix (the sum of its diagonal elements \(a+c\)) determines lattice type: if \(|tr(M)|<2\), then the lattice is Euclidean, and if \(|tr(M)|>2\) then it is Minkovskian. The case when \(tr(M)=\pm 2\) is degenerate and not supported by the simulator.
+	<p>This, however, is not a one-to-one relation, since different matrices could define the same lattice. Particularly, congruent matrices generate the same lattice. The trace of the matrix (the sum of its diagonal elements \(a+c\)) determines lattice type: if \(|tr(M)|<2\), then the lattice is Euclidean, and if \(|tr(M)|>2\) then it is Minkowskian. The case when \(tr(M)=\pm 2\) is degenerate and not supported by the simulator.
 	</p>
 	<p>In the simulator, <b>Lattice matrix</b> field defines the lattice. It must contain four integers separated by spaces, in row-major order: "a b c d".
 	</p>
@@ -82,7 +82,7 @@
 	    </tr>
 	    <tr>
 	      <td>\(\left(\begin{matrix}2 && 1\\1 && 1\end{matrix}\right)\)</td>
-	      <td>The simplest Minkovskian lattice</td>
+	      <td>The simplest Minkowskian lattice</td>
 	    </tr>
 	  </tbody>
 	</table>
@@ -119,18 +119,18 @@
 	</p>
 	<h3 id="navigate">Navigation: pan, zoom, rotate</h3>
 	<p>Use <b>Pan</b> tool to drag the view using the mouse. Alternatively, hold <kbd>Ctrl</kbd> key and drag mouse - this method works when any other tool is active</p>
-	<p>Use <b>Rotate</b> tool or drag mouse left and right holding <kbd>Shift</kbd> to rotate the view around the center. When Euclidean lattice matrix is used, this tool does a familiar Euclidean rotation. When the matrix is Minkovskian, it does pseudo-rotation (squeeze mapping).</p>
+	<p>Use <b>Rotate</b> tool or drag mouse left and right holding <kbd>Shift</kbd> to rotate the view around the center. When Euclidean lattice matrix is used, this tool does a familiar Euclidean rotation. When the matrix is Minkowskian, it does pseudo-rotation (squeeze mapping).</p>
 
 	<p>To zoom the view in and out, either use mouse wheel or buttons <b>Zoom In/Out</b> on the left control panel.
 	</p>
-	<p>"Navigator" section of the left control panel shows current position and rotation of the view. Rotation angle is in degrees; when Minkovskian lattice is active, rotation angle could be arbitrarily high or low: unlike Euclidean rotation, pseudo-rotation does not loops after 360&deg;.
+	<p>"Navigator" section of the left control panel shows current position and rotation of the view. Rotation angle is in degrees; when Minkowskian lattice is active, rotation angle could be arbitrarily high or low: unlike Euclidean rotation, pseudo-rotation does not loops after 360&deg;.
 	</p>
 	<h3 id="display">Adjusting the display</h3>
 	<p>
 	  Several buttons on the left panel control the appearance of the view:
 	</p>
 	<ul>
-	  <li><span class="icon icon-connect">C</span> - show lines, connecting neighbor cells. In Minkovskian lattices, neighbors are not obvious.
+	  <li><span class="icon icon-connect">C</span> - show lines, connecting neighbor cells. In Minkowskian lattices, neighbors are not obvious.
 	  </li>
 	  <li><span class="icon icon-empty">E</span> - show empty cells, i. e. the cells whose state is 0.
 	  </li>

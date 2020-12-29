@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Minkovski plane cellular automata simulator</title>
+    <title>Minkowski plane cellular automata simulator</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="mystyle.css">
     <link rel="stylesheet" type="text/css" href="icons.css">
@@ -23,7 +23,7 @@
 	    Hexagonal
 	  </option>
 	  </optgroup>
-	  <optgroup label="Minkovski">
+	  <optgroup label="Minkowski">
 	    <option value="{'matrix':'2 1 1 1', 'neighbors':'1 0'}">
 	      Simplest (tr=3)
 	    </option>
@@ -217,7 +217,7 @@
 	<h2>Custom rules</h2>
 	<p>
 	<a class="reference" href="?matrix=2+1+1+1&neighbors=1+0&center=0%2C0&angle=0&customrule=%7B%0A++++states%3A+9%2C%0A++++foldInitial%3A+null%2C%0A++++stats%3A+null%2C%0A%0A++++fold%3A+function%28sum%2C+s%29%7B%0A%09if%28s%3D%3D%3D0%29+return+sum%3B%0A%09if%28sum%3D%3Dnull%29%7B%0A%09++++sum+%3D+new+Array%28this.states-1%29%3B%0A%09++++for%28var+i%3D0%3B+i%21%3Dsum.length%3B+%2B%2Bi%29%0A%09%09sum%5Bi%5D+%3D+0%3B%0A%09%7D%0A%09sum%5Bs-1%5D+%2B%3D+1%3B%0A%09return+sum%0A++++%7D%2C%0A%0A++++%2F%2Ftransition+map%3A+key+is+the+state+%2B+neighbor+states+code%2C+value+is+next+state%0A++++map%3A%7B%0A%09%2F%2Ffirst+step%0A%09%221+22%22%3A1%2C%0A%09%222+1344%22%3A+5%2C%0A%09%223+244%22%3A+6%2C%0A%09%224+234%22%3A+7%2C%0A%09%224+234%22%3A+7%2C%0A%09%220+14%22%3A+8%2C%0A%09%2F%2F2nd+step%0A%09%221+5588%22%3A+1%2C%0A%09%227+5678%22%3A++3%2C%09%0A%09%227+567%22%3A+0%2C%0A%09%228+17%22%3A+2%2C%0A%09%220+78%22%3A+4%2C%0A%0A%09%222+13444%22%3A+5%2C%0A%09%221+558888%22%3A+1%2C%0A++++%7D%2C%0A++++next%3A+function%28s%2C+sum%29%7B%0A++++++++%2F%2Fconstruct+easy+to+read+state+code%0A%09var+sss%3D%22%22%2Bs%2B%22+%22%3B%0A%09if+%28sum%21%3Dnull%29%7B%0A%09++++for%28var+i%3D0%3B+i%21%3Dsum.length%3B+i%2B%2B%29%7B%0A%09%09var+si+%3D+sum%5Bi%5D%3B%0A%09%09for%28var+j%3D0%3Bj%21%3Dsi%3Bj%2B%2B%29%7B%0A%09%09++++sss+%3D+sss+%2B+%28i%2B1%29%3B%0A%09%09%7D%0A%09++++%7D%0A%09%7D%09%0A%09if+%28sss+in+this.map%29%0A%09++++return+this.map%5Bsss%5D%0A%09else%0A%09++++return+0%09%0A++++%7D%0A%7D%0A&cells=0+0+1%3B0+1+3%3B1+1+4%3B3+-3+4%3B-1+-1+4%3B0+-1+3%3B-2+0+4%3B-1+0+2%3B1+0+2%3B2+0+4%3B-3+3+4">Rotating spaceship</a> -
-	a pattern that exhibits behavior only possible in Minkovski plane: infinite (pseudo) rotation.
+	a pattern that exhibits behavior only possible in Minkowski plane: infinite (pseudo) rotation.
 	It quickly goes out of sight, so use "Rotate" tool to follow it. This pattern uses specially engineered custom rule with 9 states.
 	</p>
 	
