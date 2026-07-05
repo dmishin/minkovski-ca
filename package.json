@@ -15,7 +15,7 @@
     "coffeeify": "^3.0.1",
     "coffeescript": "^2.5.1",
     "html-includes": "^1.2.3",
-    "mocha": "^8.2.1"
+    "mocha": "^11.7.6"
   },
   "scripts": {
     "test": "make test",
